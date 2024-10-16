@@ -1,0 +1,100 @@
+MIT License
+
+Copyright (c) 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy...
+
+---
+
+## **8. Publishing to PyPI**
+
+To make your library publicly available, you can publish it to the Python Package Index (PyPI).
+
+### **8.1. Building the Package**
+
+1. **Install Build Tools:**
+
+    ```bash
+    pip install setuptools wheel twine
+    ```
+
+2. **Build the Package:**
+
+    From your project root, run:
+
+    ```bash
+    python setup.py sdist bdist_wheel
+    ```
+
+    This will create distribution files in the `dist/` directory.
+
+### **8.2. Uploading to PyPI**
+
+1. **Register an Account on PyPI:**
+
+    If you haven't already, create an account on [PyPI](https://pypi.org/).
+
+2. **Upload the Package:**
+
+    ```bash
+    twine upload dist/*
+    ```
+
+    You'll be prompted to enter your PyPI username and password.
+
+3. **Verify Installation:**
+
+    After uploading, install your package using:
+
+    ```bash
+    pip install enhanced_adaptive_dbscan
+    ```
+
+---
+
+## **9. Continuous Integration (CI)**
+
+Implement CI to automate testing and deployment, ensuring code quality and reliability.
+
+### **9.1. GitHub Actions Workflow**
+
+Create a GitHub Actions workflow to automate testing and building.
+
+#### **`.github/workflows/python-package.yml`**
+
+```yaml
+name: Python package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine pytest
+    - name: Run tests
+      run: |
+        pytest
+    - name: Build package
+      run: |
+        python setup.py sdist bdist_wheel
+    - name: Upload to PyPI
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
