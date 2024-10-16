@@ -10,8 +10,8 @@ long_description = (this_directory / "README.md").read_text()
 setup(
     name='enhanced_adaptive_dbscan',  # Replace with your own package name
     version='0.1.0',
-    author='Your Name',
-    author_email='your.email@example.com',
+    author='Michael Kennedy',
+    author_email='michael.patrick.kennedy@outlook.ie',
     description='An Enhanced Adaptive DBSCAN clustering algorithm for semiconductor wafer defects.',
     long_description=long_description,
     long_description_content_type='text/markdown',
