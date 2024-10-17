@@ -4,11 +4,12 @@ Enhanced Adaptive DBSCAN
 
 An **Enhanced Adaptive DBSCAN** clustering algorithm tailored for **semiconductor wafer defect analysis** and other applications requiring adaptive density-based clustering.
 
-.. image:: docs/images/algorithm_illustration.png
-   :alt: Algorithm Illustration
-   :align: center
 
-*Illustration of the Enhanced Adaptive DBSCAN clustering process.*
+<p align="center">
+  <img src="docs/images/flowchart.png" alt="Clustering Process Flowchart" width="600">
+</p>
+
+*Illustration of the clustering process of the Enhanced Adaptive DBSCAN algorithm.*
 
 Table of Contents
 =================
