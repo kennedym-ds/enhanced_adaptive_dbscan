@@ -15,7 +15,7 @@ setup(
     description='An Enhanced Adaptive DBSCAN clustering algorithm for semiconductor wafer defects.',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/yourusername/enhanced_adaptive_dbscan',  # Replace with your own GitHub repo
+    url='https://github.com/kennedym-ds/enhanced_adaptive_dbscan',  # Replace with your own GitHub repo
     packages=find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
