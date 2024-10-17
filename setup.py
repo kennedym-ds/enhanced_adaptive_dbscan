@@ -1,21 +1,21 @@
 # setup.py
 
 from setuptools import setup, find_packages
-from pathlib import Path
+import pathlib
 
-# Read the contents of README.md
-this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text()
+# Read the contents of README.rst
+here = pathlib.Path(__file__).parent.resolve()
+long_description = (here / 'README.rst').read_text(encoding='utf-8')
 
 setup(
     name='enhanced_adaptive_dbscan',  # Replace with your own package name
-    version='0.1.0',
+    version='0.1.1',
     author='Michael Kennedy',
     author_email='michael.patrick.kennedy@outlook.ie',
     description='An Enhanced Adaptive DBSCAN clustering algorithm for semiconductor wafer defects.',
     long_description=long_description,
-    long_description_content_type='text/markdown',
-    url='https://github.com/kennedym-ds/enhanced_adaptive_dbscan',  # Replace with your own GitHub repo
+    long_description_content_type='text/x-rst',
+    url='https://github.com/kennedym-ds/enhanced_adaptive_dbscan',  # Replace with your GitHub repo
     packages=find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
