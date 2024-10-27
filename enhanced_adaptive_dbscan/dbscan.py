@@ -118,7 +118,7 @@ class EnhancedAdaptiveDBSCAN:
 
     def compute_local_density(self, X):
         """
-        Compute local density using k-NN distances with KDTree for efficiency.
+        Compute local density using k-NN distances with KD-Tree for efficiency.
 
         Parameters:
         - X (ndarray): Shape (n_samples, n_features)
@@ -126,11 +126,19 @@ class EnhancedAdaptiveDBSCAN:
         Returns:
         - local_density (ndarray): Shape (n_samples,)
         """
+        n_samples = X.shape[0]
         tree = KDTree(X)
-        distances, _ = tree.query(X, k=self.k + 1)  # k+1 because the first neighbor is the point itself
-        mean_distance = np.mean(distances[:, 1:], axis=1)  # Exclude the point itself
+        k = min(self.k + 1, n_samples)
+        distances, _ = tree.query(X, k=k)
+        if k > 1:
+            # Exclude the point itself
+            mean_distance = np.mean(distances[:, 1:], axis=1)
+        else:
+            # Only one point in dataset
+            mean_distance = distances[:, 0]
         local_density = 1 / (mean_distance + 1e-5)  # Avoid division by zero
         return local_density
+
 
     def adjust_density_near_boundary(self, X, local_density):
         """
