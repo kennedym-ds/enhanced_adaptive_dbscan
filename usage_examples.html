@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Usage Examples &#8212; enhanced_adaptive_dbscan November 2024 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=d3eb9a3c"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Advanced Features" href="advanced_features.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="usage-examples">
+<h1>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading">¶</a></h1>
+<p>This guide provides comprehensive examples demonstrating the Enhanced Adaptive DBSCAN framework’s capabilities.</p>
+<section id="basic-clustering">
+<h2>Basic Clustering<a class="headerlink" href="#basic-clustering" title="Link to this heading">¶</a></h2>
+<section id="simple-dataset">
+<h3>Simple Dataset<a class="headerlink" href="#simple-dataset" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnhancedAdaptiveDBSCAN</span>
+
+<span class="c1"># Generate sample data with multiple density regions</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">data1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">data2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">data3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="mf">0.3</span><span class="p">,</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">data1</span><span class="p">,</span> <span class="n">data2</span><span class="p">,</span> <span class="n">data3</span><span class="p">])</span>
+
+<span class="c1"># Basic clustering</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">min_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Visualize</span>
+<span class="n">clusterer</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Basic Clustering Example&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="parameter-optimization">
+<h3>Parameter Optimization<a class="headerlink" href="#parameter-optimization" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.adaptive_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">AdaptiveTuningEngine</span>
+
+<span class="c1"># Create optimization engine</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">AdaptiveTuningEngine</span><span class="p">()</span>
+
+<span class="c1"># Optimize parameters</span>
+<span class="n">best_params</span><span class="p">,</span> <span class="n">optimization_history</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">optimize_parameters</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> 
+    <span class="n">max_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">optimization_strategy</span><span class="o">=</span><span class="s1">&#39;bayesian&#39;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best parameters found: </span><span class="si">{</span><span class="n">best_params</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Use optimized parameters</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span><span class="o">**</span><span class="n">best_params</span><span class="p">)</span>
+<span class="n">optimized_labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="multi-density-clustering">
+<h2>Multi-Density Clustering<a class="headerlink" href="#multi-density-clustering" title="Link to this heading">¶</a></h2>
+<section id="varying-density-regions">
+<h3>Varying Density Regions<a class="headerlink" href="#varying-density-regions" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate data with different density regions</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">dense_region</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mf">0.2</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">sparse_region</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="mf">0.8</span><span class="p">,</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">medium_region</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="mf">0.5</span><span class="p">,</span> <span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="n">X_multi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">dense_region</span><span class="p">,</span> <span class="n">sparse_region</span><span class="p">,</span> <span class="n">medium_region</span><span class="p">])</span>
+
+<span class="c1"># Enable multi-density clustering</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+    <span class="n">enable_mdbscan</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">density_adaptation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">stability_threshold</span><span class="o">=</span><span class="mf">0.3</span>
+<span class="p">)</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X_multi</span><span class="p">)</span>
+
+<span class="c1"># Analyze density regions</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">clusterer</span><span class="p">,</span> <span class="s1">&#39;get_density_analysis&#39;</span><span class="p">):</span>
+    <span class="n">density_info</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">get_density_analysis</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Density regions identified: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">density_info</span><span class="p">[</span><span class="s1">&#39;regions&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">density_info</span><span class="p">[</span><span class="s1">&#39;regions&#39;</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Region </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: density=</span><span class="si">{</span><span class="n">region</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, points=</span><span class="si">{</span><span class="n">region</span><span class="p">[</span><span class="s1">&#39;n_points&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="hierarchical-clustering-analysis">
+<h3>Hierarchical Clustering Analysis<a class="headerlink" href="#hierarchical-clustering-analysis" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access hierarchical clustering components (if available)</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">clusterer</span><span class="p">,</span> <span class="s1">&#39;hierarchy_manager_&#39;</span><span class="p">):</span>
+    <span class="c1"># Get hierarchical analysis</span>
+    <span class="n">hierarchy_info</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">hierarchy_manager_</span><span class="o">.</span><span class="n">get_hierarchy_info</span><span class="p">()</span>
+    
+    <span class="c1"># Plot stability scores across different scales</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">scales</span> <span class="o">=</span> <span class="n">hierarchy_info</span><span class="p">[</span><span class="s1">&#39;scales&#39;</span><span class="p">]</span>
+    <span class="n">stability_scores</span> <span class="o">=</span> <span class="n">hierarchy_info</span><span class="p">[</span><span class="s1">&#39;stability_scores&#39;</span><span class="p">]</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scales</span><span class="p">,</span> <span class="n">stability_scores</span><span class="p">,</span> <span class="s1">&#39;bo-&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Scale&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Stability Score&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Hierarchical Clustering Stability Analysis&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ensemble-clustering">
+<h2>Ensemble Clustering<a class="headerlink" href="#ensemble-clustering" title="Link to this heading">¶</a></h2>
+<section id="consensus-clustering">
+<h3>Consensus Clustering<a class="headerlink" href="#consensus-clustering" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.ensemble_clustering</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConsensusClusteringEngine</span>
+
+<span class="c1"># Create ensemble with different parameter sets</span>
+<span class="n">ensemble</span> <span class="o">=</span> <span class="n">ConsensusClusteringEngine</span><span class="p">(</span>
+    <span class="n">base_clusterer</span><span class="o">=</span><span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(),</span>
+    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">parameter_diversity_threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">voting_strategy</span><span class="o">=</span><span class="s1">&#39;quality_weighted&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit consensus clustering</span>
+<span class="n">consensus_labels</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">fit_consensus_clustering</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Get ensemble statistics</span>
+<span class="n">ensemble_stats</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">get_ensemble_statistics</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of base clusterers: </span><span class="si">{</span><span class="n">ensemble_stats</span><span class="p">[</span><span class="s1">&#39;n_estimators&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Average quality score: </span><span class="si">{</span><span class="n">ensemble_stats</span><span class="p">[</span><span class="s1">&#39;avg_quality&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Consensus stability: </span><span class="si">{</span><span class="n">ensemble_stats</span><span class="p">[</span><span class="s1">&#39;consensus_stability&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Visualize ensemble results</span>
+<span class="n">ensemble</span><span class="o">.</span><span class="n">plot_consensus_results</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">consensus_labels</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="parameter-diversity-analysis">
+<h3>Parameter Diversity Analysis<a class="headerlink" href="#parameter-diversity-analysis" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Analyze parameter diversity in ensemble</span>
+<span class="n">parameter_sets</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">get_parameter_sets</span><span class="p">()</span>
+<span class="n">diversity_matrix</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">calculate_parameter_diversity</span><span class="p">()</span>
+
+<span class="c1"># Plot parameter diversity</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">diversity_matrix</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Parameter Diversity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Ensemble Parameter Diversity Matrix&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Estimator Index&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Estimator Index&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="streaming-and-production">
+<h2>Streaming and Production<a class="headerlink" href="#streaming-and-production" title="Link to this heading">¶</a></h2>
+<section id="streaming-data-processing">
+<h3>Streaming Data Processing<a class="headerlink" href="#streaming-data-processing" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.streaming_engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamingEngine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.streaming_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamingConfig</span>
+
+<span class="c1"># Configure streaming</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">StreamingConfig</span><span class="p">(</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">update_frequency</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">concept_drift_detection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">drift_threshold</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="p">)</span>
+
+<span class="c1"># Create streaming engine</span>
+<span class="n">streaming_engine</span> <span class="o">=</span> <span class="n">StreamingEngine</span><span class="p">(</span>
+    <span class="n">base_clusterer</span><span class="o">=</span><span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(),</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span>
+<span class="p">)</span>
+
+<span class="c1"># Simulate streaming data</span>
+<span class="k">for</span> <span class="n">batch_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="c1"># Generate batch data</span>
+    <span class="n">batch_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="n">batch_id</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mf">0.5</span><span class="p">,</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    
+    <span class="c1"># Process batch</span>
+    <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">streaming_engine</span><span class="o">.</span><span class="n">process_batch</span><span class="p">(</span><span class="n">batch_data</span><span class="p">)</span>
+    
+    <span class="c1"># Check for concept drift</span>
+    <span class="k">if</span> <span class="n">streaming_engine</span><span class="o">.</span><span class="n">concept_drift_detector</span><span class="o">.</span><span class="n">drift_detected</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Concept drift detected at batch </span><span class="si">{</span><span class="n">batch_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">streaming_engine</span><span class="o">.</span><span class="n">handle_concept_drift</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="production-pipeline">
+<h3>Production Pipeline<a class="headerlink" href="#production-pipeline" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.production_pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProductionPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.deployment_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeploymentConfig</span>
+
+<span class="c1"># Configure deployment</span>
+<span class="n">deployment_config</span> <span class="o">=</span> <span class="n">DeploymentConfig</span><span class="p">(</span>
+    <span class="n">model_validation_threshold</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">performance_monitoring</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">auto_retraining</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">model_versioning</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Create production pipeline</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">ProductionPipeline</span><span class="p">(</span><span class="n">deployment_config</span><span class="p">)</span>
+
+<span class="c1"># Train and deploy model</span>
+<span class="n">model_id</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">train_and_deploy</span><span class="p">(</span>
+    <span class="n">training_data</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;eps&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;min_samples&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model deployed with ID: </span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Monitor performance</span>
+<span class="n">performance_metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">monitor_performance</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model performance: </span><span class="si">{</span><span class="n">performance_metrics</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-optimization">
+<h2>Advanced Optimization<a class="headerlink" href="#advanced-optimization" title="Link to this heading">¶</a></h2>
+<section id="grid-search-with-validation">
+<h3>Grid Search with Validation<a class="headerlink" href="#grid-search-with-validation" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.adaptive_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterSpaceExplorer</span>
+
+<span class="c1"># Define parameter space</span>
+<span class="n">param_space</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;eps&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">],</span>
+    <span class="s1">&#39;min_samples&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+    <span class="s1">&#39;adaptive&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1"># Create explorer</span>
+<span class="n">explorer</span> <span class="o">=</span> <span class="n">ParameterSpaceExplorer</span><span class="p">()</span>
+
+<span class="c1"># Explore parameter space</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">explorer</span><span class="o">.</span><span class="n">explore_parameter_space</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> 
+    <span class="n">param_space</span><span class="p">,</span> 
+    <span class="n">exploration_strategy</span><span class="o">=</span><span class="s1">&#39;grid_search&#39;</span><span class="p">,</span>
+    <span class="n">cv_folds</span><span class="o">=</span><span class="mi">5</span>
+<span class="p">)</span>
+
+<span class="c1"># Get best configuration</span>
+<span class="n">best_config</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;best_params&#39;</span><span class="p">]</span>
+<span class="n">best_score</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;best_score&#39;</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best configuration: </span><span class="si">{</span><span class="n">best_config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best score: </span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Plot parameter space exploration</span>
+<span class="n">explorer</span><span class="o">.</span><span class="n">plot_parameter_space_results</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="bayesian-optimization">
+<h3>Bayesian Optimization<a class="headerlink" href="#bayesian-optimization" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.adaptive_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">BayesianOptimizer</span>
+
+<span class="c1"># Create Bayesian optimizer</span>
+<span class="n">bayesian_opt</span> <span class="o">=</span> <span class="n">BayesianOptimizer</span><span class="p">(</span>
+    <span class="n">acquisition_function</span><span class="o">=</span><span class="s1">&#39;expected_improvement&#39;</span><span class="p">,</span>
+    <span class="n">n_initial_points</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+
+<span class="c1"># Define optimization bounds</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;eps&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+    <span class="s1">&#39;min_samples&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># Run optimization</span>
+<span class="n">optimization_result</span> <span class="o">=</span> <span class="n">bayesian_opt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> 
+    <span class="n">bounds</span><span class="p">,</span>
+    <span class="n">n_iterations</span><span class="o">=</span><span class="mi">30</span>
+<span class="p">)</span>
+
+<span class="c1"># Plot optimization progress</span>
+<span class="n">bayesian_opt</span><span class="o">.</span><span class="n">plot_optimization_progress</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-analysis">
+<h2>Performance Analysis<a class="headerlink" href="#performance-analysis" title="Link to this heading">¶</a></h2>
+<section id="comprehensive-benchmarking">
+<h3>Comprehensive Benchmarking<a class="headerlink" href="#comprehensive-benchmarking" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.adaptive_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">DBSCANOptimizer</span>
+
+<span class="c1"># Create optimizer for benchmarking</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">DBSCANOptimizer</span><span class="p">()</span>
+
+<span class="c1"># Run comprehensive benchmarking</span>
+<span class="n">benchmark_results</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">performance_benchmarking_example</span><span class="p">(</span>
+    <span class="n">dataset_sizes</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">],</span>
+    <span class="n">n_features_list</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+    <span class="n">n_trials</span><span class="o">=</span><span class="mi">5</span>
+<span class="p">)</span>
+
+<span class="c1"># Analyze results</span>
+<span class="k">for</span> <span class="n">size</span><span class="p">,</span> <span class="n">results</span> <span class="ow">in</span> <span class="n">benchmark_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">mean_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;execution_times&#39;</span><span class="p">])</span>
+    <span class="n">mean_silhouette</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;silhouette_scores&#39;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Size </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">: Time=</span><span class="si">{</span><span class="n">mean_time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">s, Silhouette=</span><span class="si">{</span><span class="n">mean_silhouette</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Plot performance scaling</span>
+<span class="n">optimizer</span><span class="o">.</span><span class="n">plot_performance_scaling</span><span class="p">(</span><span class="n">benchmark_results</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="memory-usage-analysis">
+<h3>Memory Usage Analysis<a class="headerlink" href="#memory-usage-analysis" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">monitor_memory_usage</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor memory usage during function execution.&quot;&quot;&quot;</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+    <span class="n">initial_memory</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>  <span class="c1"># MB</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="n">final_memory</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span><span class="o">.</span><span class="n">rss</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span>  <span class="c1"># MB</span>
+    <span class="n">memory_delta</span> <span class="o">=</span> <span class="n">final_memory</span> <span class="o">-</span> <span class="n">initial_memory</span>
+    
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">memory_delta</span>
+
+<span class="c1"># Monitor clustering memory usage</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">()</span>
+<span class="n">labels</span><span class="p">,</span> <span class="n">memory_used</span> <span class="o">=</span> <span class="n">monitor_memory_usage</span><span class="p">(</span><span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory used during clustering: </span><span class="si">{</span><span class="n">memory_used</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> MB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="real-world-applications">
+<h2>Real-World Applications<a class="headerlink" href="#real-world-applications" title="Link to this heading">¶</a></h2>
+<section id="anomaly-detection">
+<h3>Anomaly Detection<a class="headerlink" href="#anomaly-detection" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulate network traffic data</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">456</span><span class="p">)</span>
+<span class="n">normal_traffic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">anomalous_traffic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">200</span><span class="p">,</span> <span class="mi">150</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">network_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">normal_traffic</span><span class="p">,</span> <span class="n">anomalous_traffic</span><span class="p">])</span>
+
+<span class="c1"># Configure for anomaly detection</span>
+<span class="n">anomaly_detector</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+    <span class="n">eps</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+    <span class="n">min_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">adaptive</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit and identify anomalies</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">anomaly_detector</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">network_data</span><span class="p">)</span>
+<span class="n">anomalies</span> <span class="o">=</span> <span class="n">network_data</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Anomalies detected: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalies</span><span class="p">)</span><span class="si">}</span><span class="s2"> out of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">network_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Anomaly rate: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalies</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">network_data</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+<span class="c1"># Visualize anomalies</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">network_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">network_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">anomalies</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">anomalies</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Anomalies&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Feature 1&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Feature 2&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Network Traffic Anomaly Detection&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="customer-segmentation">
+<h3>Customer Segmentation<a class="headerlink" href="#customer-segmentation" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simulate customer behavior data</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">789</span><span class="p">)</span>
+<span class="n">customers</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># High-value customers</span>
+<span class="n">high_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">80</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">customers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">high_value</span><span class="p">)</span>
+
+<span class="c1"># Medium-value customers  </span>
+<span class="n">medium_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">customers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">medium_value</span><span class="p">)</span>
+
+<span class="c1"># Low-value customers</span>
+<span class="n">low_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">customers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">low_value</span><span class="p">)</span>
+
+<span class="n">customer_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">customers</span><span class="p">)</span>
+
+<span class="c1"># Segment customers</span>
+<span class="n">segmentation</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+    <span class="n">adaptive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">enable_mdbscan</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="n">segments</span> <span class="o">=</span> <span class="n">segmentation</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">customer_data</span><span class="p">)</span>
+
+<span class="c1"># Analyze segments</span>
+<span class="n">unique_segments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Customer segments identified: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_segments</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">segment_id</span> <span class="ow">in</span> <span class="n">unique_segments</span><span class="p">:</span>
+    <span class="n">segment_mask</span> <span class="o">=</span> <span class="n">segments</span> <span class="o">==</span> <span class="n">segment_id</span>
+    <span class="n">segment_customers</span> <span class="o">=</span> <span class="n">customer_data</span><span class="p">[</span><span class="n">segment_mask</span><span class="p">]</span>
+    <span class="n">avg_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">segment_customers</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Segment </span><span class="si">{</span><span class="n">segment_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">segment_customers</span><span class="p">)</span><span class="si">}</span><span class="s2"> customers, &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;avg value=[</span><span class="si">{</span><span class="n">avg_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">avg_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+<span class="c1"># Visualize segmentation</span>
+<span class="n">segmentation</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Customer Segmentation Analysis&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling-and-debugging">
+<h2>Error Handling and Debugging<a class="headerlink" href="#error-handling-and-debugging" title="Link to this heading">¶</a></h2>
+<section id="robust-error-handling">
+<h3>Robust Error Handling<a class="headerlink" href="#robust-error-handling" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Configure logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">robust_clustering</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Robust clustering with error handling and retries.&quot;&quot;&quot;</span>
+    
+    <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+                <span class="n">eps</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="n">min_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                <span class="n">adaptive</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            
+            <span class="c1"># Validate results</span>
+            <span class="n">n_clusters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">labels</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n_clusters</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No clusters found&quot;</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clustering successful: </span><span class="si">{</span><span class="n">n_clusters</span><span class="si">}</span><span class="s2"> clusters found&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">labels</span><span class="p">,</span> <span class="n">clusterer</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clustering attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;All clustering attempts failed&quot;</span><span class="p">)</span>
+                <span class="k">raise</span>
+            
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+<span class="c1"># Use robust clustering</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">labels</span><span class="p">,</span> <span class="n">clusterer</span> <span class="o">=</span> <span class="n">robust_clustering</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Clustering completed successfully&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clustering failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="performance-debugging">
+<h3>Performance Debugging<a class="headerlink" href="#performance-debugging" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">timer</span><span class="p">(</span><span class="n">description</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager for timing operations.&quot;&quot;&quot;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">yield</span>
+    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+
+<span class="c1"># Profile different components</span>
+<span class="k">with</span> <span class="n">timer</span><span class="p">(</span><span class="s2">&quot;Data preprocessing&quot;</span><span class="p">):</span>
+    <span class="c1"># Preprocessing steps</span>
+    <span class="n">X_scaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">X</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">timer</span><span class="p">(</span><span class="s2">&quot;Clustering execution&quot;</span><span class="p">):</span>
+    <span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">()</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X_scaled</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">timer</span><span class="p">(</span><span class="s2">&quot;Visualization&quot;</span><span class="p">):</span>
+    <span class="n">clusterer</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1"># Memory profiling</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">clusterer</span><span class="p">,</span> <span class="s1">&#39;get_memory_usage&#39;</span><span class="p">):</span>
+    <span class="n">memory_stats</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">get_memory_usage</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Memory usage: </span><span class="si">{</span><span class="n">memory_stats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This comprehensive guide covers the main usage patterns for the Enhanced Adaptive DBSCAN framework. For more specific use cases or advanced features, refer to the API documentation.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">enhanced_adaptive_dbscan</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-clustering">Basic Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-density-clustering">Multi-Density Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ensemble-clustering">Ensemble Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#streaming-and-production">Streaming and Production</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-optimization">Advanced Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-analysis">Performance Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real-world-applications">Real-World Applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling-and-debugging">Error Handling and Debugging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_features.html">Advanced Features</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/core.html">Core API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/algorithms.html">Algorithm Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/optimization.html">Optimization Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/production.html">Production Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="getting_started.html" title="previous chapter">Getting Started</a></li>
+      <li>Next: <a href="advanced_features.html" title="next chapter">Advanced Features</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Michael Kennedy.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/usage_examples.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

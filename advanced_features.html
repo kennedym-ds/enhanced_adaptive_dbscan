@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Advanced Features &#8212; enhanced_adaptive_dbscan November 2024 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=d3eb9a3c"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Core API Reference" href="api/core.html" />
+    <link rel="prev" title="Usage Examples" href="usage_examples.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="advanced-features">
+<h1>Advanced Features<a class="headerlink" href="#advanced-features" title="Link to this heading">¶</a></h1>
+<p>This document covers the advanced capabilities of the Enhanced Adaptive DBSCAN framework.</p>
+<section id="adaptive-parameter-optimization">
+<h2>Adaptive Parameter Optimization<a class="headerlink" href="#adaptive-parameter-optimization" title="Link to this heading">¶</a></h2>
+<section id="automatic-parameter-tuning">
+<h3>Automatic Parameter Tuning<a class="headerlink" href="#automatic-parameter-tuning" title="Link to this heading">¶</a></h3>
+<p>The framework includes sophisticated parameter optimization algorithms that automatically find optimal clustering parameters for your dataset.</p>
+<section id="bayesian-optimization">
+<h4>Bayesian Optimization<a class="headerlink" href="#bayesian-optimization" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.adaptive_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">BayesianOptimizer</span>
+
+<span class="c1"># Create Bayesian optimizer</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">BayesianOptimizer</span><span class="p">(</span>
+    <span class="n">acquisition_function</span><span class="o">=</span><span class="s1">&#39;expected_improvement&#39;</span><span class="p">,</span>
+    <span class="n">n_initial_points</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Define parameter bounds</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;eps&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>
+    <span class="s1">&#39;min_samples&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># Optimize parameters</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best parameters: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">best_params</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best score: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="genetic-algorithm-optimization">
+<h4>Genetic Algorithm Optimization<a class="headerlink" href="#genetic-algorithm-optimization" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.adaptive_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneticOptimizer</span>
+
+<span class="c1"># Create genetic optimizer</span>
+<span class="n">genetic_opt</span> <span class="o">=</span> <span class="n">GeneticOptimizer</span><span class="p">(</span>
+    <span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">n_generations</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">mutation_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">crossover_rate</span><span class="o">=</span><span class="mf">0.8</span>
+<span class="p">)</span>
+
+<span class="c1"># Run genetic optimization</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">genetic_opt</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="meta-learning">
+<h3>Meta-Learning<a class="headerlink" href="#meta-learning" title="Link to this heading">¶</a></h3>
+<p>The framework can learn from previous optimization experiences to improve future parameter selection:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.adaptive_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaLearningComponent</span>
+
+<span class="c1"># Create meta-learning component</span>
+<span class="n">meta_learner</span> <span class="o">=</span> <span class="n">MetaLearningComponent</span><span class="p">()</span>
+
+<span class="c1"># Record optimization experience</span>
+<span class="n">meta_learner</span><span class="o">.</span><span class="n">record_experience</span><span class="p">(</span>
+    <span class="n">dataset_features</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="n">best_params</span><span class="p">,</span>
+    <span class="n">performance_score</span><span class="o">=</span><span class="n">best_score</span>
+<span class="p">)</span>
+
+<span class="c1"># Get recommendations for new dataset</span>
+<span class="n">recommendations</span> <span class="o">=</span> <span class="n">meta_learner</span><span class="o">.</span><span class="n">recommend_strategy</span><span class="p">(</span><span class="n">new_dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="multi-density-clustering-mdbscan">
+<h2>Multi-Density Clustering (MDBSCAN)<a class="headerlink" href="#multi-density-clustering-mdbscan" title="Link to this heading">¶</a></h2>
+<section id="hierarchical-density-analysis">
+<h3>Hierarchical Density Analysis<a class="headerlink" href="#hierarchical-density-analysis" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable multi-density clustering</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+    <span class="n">enable_mdbscan</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">density_adaptation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">hierarchy_method</span><span class="o">=</span><span class="s1">&#39;complete&#39;</span>
+<span class="p">)</span>
+
+<span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Access hierarchical components</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">clusterer</span><span class="p">,</span> <span class="s1">&#39;hierarchy_manager_&#39;</span><span class="p">):</span>
+    <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">hierarchy_manager_</span>
+    
+    <span class="c1"># Get clustering at different scales</span>
+    <span class="k">for</span> <span class="n">scale</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">]:</span>
+        <span class="n">scale_labels</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">extract_clusters_at_scale</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">n_clusters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">scale_labels</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">scale_labels</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scale </span><span class="si">{</span><span class="n">scale</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">n_clusters</span><span class="si">}</span><span class="s2"> clusters&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="boundary-processing">
+<h3>Boundary Processing<a class="headerlink" href="#boundary-processing" title="Link to this heading">¶</a></h3>
+<p>Advanced boundary processing for improved cluster refinement:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access boundary processor</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">clusterer</span><span class="p">,</span> <span class="s1">&#39;boundary_processor_&#39;</span><span class="p">):</span>
+    <span class="n">boundary_processor</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">boundary_processor_</span>
+    
+    <span class="c1"># Get boundary analysis</span>
+    <span class="n">boundary_info</span> <span class="o">=</span> <span class="n">boundary_processor</span><span class="o">.</span><span class="n">analyze_boundaries</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    
+    <span class="c1"># Apply boundary refinement</span>
+    <span class="n">refined_labels</span> <span class="o">=</span> <span class="n">boundary_processor</span><span class="o">.</span><span class="n">refine_boundaries</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">refinement_strategy</span><span class="o">=</span><span class="s1">&#39;adaptive&#39;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="quality-analysis">
+<h3>Quality Analysis<a class="headerlink" href="#quality-analysis" title="Link to this heading">¶</a></h3>
+<p>Comprehensive cluster quality assessment:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Access quality analyzer</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">clusterer</span><span class="p">,</span> <span class="s1">&#39;quality_analyzer_&#39;</span><span class="p">):</span>
+    <span class="n">quality_analyzer</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">quality_analyzer_</span>
+    
+    <span class="c1"># Get detailed quality metrics</span>
+    <span class="n">quality_report</span> <span class="o">=</span> <span class="n">quality_analyzer</span><span class="o">.</span><span class="n">comprehensive_quality_analysis</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Quality Analysis Results:&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">quality_report</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ensemble-clustering">
+<h2>Ensemble Clustering<a class="headerlink" href="#ensemble-clustering" title="Link to this heading">¶</a></h2>
+<section id="consensus-clustering-engine">
+<h3>Consensus Clustering Engine<a class="headerlink" href="#consensus-clustering-engine" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.ensemble_clustering</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConsensusClusteringEngine</span>
+
+<span class="c1"># Configure ensemble</span>
+<span class="n">ensemble</span> <span class="o">=</span> <span class="n">ConsensusClusteringEngine</span><span class="p">(</span>
+    <span class="n">base_clusterer</span><span class="o">=</span><span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(),</span>
+    <span class="n">n_estimators</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">parameter_diversity_threshold</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">voting_strategy</span><span class="o">=</span><span class="s1">&#39;quality_weighted&#39;</span><span class="p">,</span>
+    <span class="n">parallel_execution</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit consensus clustering</span>
+<span class="n">consensus_labels</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">fit_consensus_clustering</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Get ensemble quality metrics</span>
+<span class="n">quality_metrics</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">get_quality_metrics</span><span class="p">()</span>
+<span class="n">stability_analysis</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">get_stability_analysis</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="parameter-ensemble">
+<h3>Parameter Ensemble<a class="headerlink" href="#parameter-ensemble" title="Link to this heading">¶</a></h3>
+<p>Generate diverse parameter sets for ensemble members:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.ensemble_clustering</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterEnsemble</span>
+
+<span class="c1"># Create parameter ensemble</span>
+<span class="n">param_ensemble</span> <span class="o">=</span> <span class="n">ParameterEnsemble</span><span class="p">(</span>
+    <span class="n">diversity_method</span><span class="o">=</span><span class="s1">&#39;latin_hypercube&#39;</span><span class="p">,</span>
+    <span class="n">n_parameter_sets</span><span class="o">=</span><span class="mi">15</span>
+<span class="p">)</span>
+
+<span class="c1"># Generate diverse parameters</span>
+<span class="n">parameter_sets</span> <span class="o">=</span> <span class="n">param_ensemble</span><span class="o">.</span><span class="n">generate_parameter_sets</span><span class="p">(</span>
+    <span class="n">base_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;eps&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;min_samples&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+    <span class="n">variation_ranges</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;eps&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="s1">&#39;min_samples&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">)}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="voting-mechanisms">
+<h3>Voting Mechanisms<a class="headerlink" href="#voting-mechanisms" title="Link to this heading">¶</a></h3>
+<p>Multiple voting strategies for consensus building:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.ensemble_clustering</span><span class="w"> </span><span class="kn">import</span> <span class="n">VotingMechanism</span>
+
+<span class="c1"># Create voting mechanism</span>
+<span class="n">voter</span> <span class="o">=</span> <span class="n">VotingMechanism</span><span class="p">()</span>
+
+<span class="c1"># Build consensus matrix</span>
+<span class="n">consensus_matrix</span> <span class="o">=</span> <span class="n">voter</span><span class="o">.</span><span class="n">build_consensus_matrix</span><span class="p">(</span><span class="n">ensemble_labels</span><span class="p">)</span>
+
+<span class="c1"># Apply different voting strategies</span>
+<span class="n">majority_labels</span> <span class="o">=</span> <span class="n">voter</span><span class="o">.</span><span class="n">majority_voting</span><span class="p">(</span><span class="n">ensemble_labels</span><span class="p">)</span>
+<span class="n">weighted_labels</span> <span class="o">=</span> <span class="n">voter</span><span class="o">.</span><span class="n">weighted_voting</span><span class="p">(</span><span class="n">ensemble_labels</span><span class="p">,</span> <span class="n">ensemble_weights</span><span class="p">)</span>
+<span class="n">quality_labels</span> <span class="o">=</span> <span class="n">voter</span><span class="o">.</span><span class="n">quality_weighted_voting</span><span class="p">(</span><span class="n">ensemble_labels</span><span class="p">,</span> <span class="n">quality_scores</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="streaming-and-real-time-processing">
+<h2>Streaming and Real-Time Processing<a class="headerlink" href="#streaming-and-real-time-processing" title="Link to this heading">¶</a></h2>
+<section id="streaming-engine">
+<h3>Streaming Engine<a class="headerlink" href="#streaming-engine" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.streaming_engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamingEngine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.streaming_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamingConfig</span>
+
+<span class="c1"># Configure streaming parameters</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">StreamingConfig</span><span class="p">(</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">update_frequency</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">concept_drift_detection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">drift_threshold</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+    <span class="n">buffer_size</span><span class="o">=</span><span class="mi">1000</span>
+<span class="p">)</span>
+
+<span class="c1"># Create streaming engine</span>
+<span class="n">stream_engine</span> <span class="o">=</span> <span class="n">StreamingEngine</span><span class="p">(</span>
+    <span class="n">base_clusterer</span><span class="o">=</span><span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(),</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span>
+<span class="p">)</span>
+
+<span class="c1"># Process streaming data</span>
+<span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">data_stream</span><span class="p">:</span>
+    <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">stream_engine</span><span class="o">.</span><span class="n">process_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+    
+    <span class="c1"># Handle concept drift</span>
+    <span class="k">if</span> <span class="n">stream_engine</span><span class="o">.</span><span class="n">concept_drift_detector</span><span class="o">.</span><span class="n">drift_detected</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Concept drift detected - adapting model&quot;</span><span class="p">)</span>
+        <span class="n">stream_engine</span><span class="o">.</span><span class="n">handle_concept_drift</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="concept-drift-detection">
+<h3>Concept Drift Detection<a class="headerlink" href="#concept-drift-detection" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.concept_drift</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConceptDriftDetector</span>
+
+<span class="c1"># Create drift detector</span>
+<span class="n">drift_detector</span> <span class="o">=</span> <span class="n">ConceptDriftDetector</span><span class="p">(</span>
+    <span class="n">detection_method</span><span class="o">=</span><span class="s1">&#39;statistical&#39;</span><span class="p">,</span>
+    <span class="n">sensitivity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">window_size</span><span class="o">=</span><span class="mi">100</span>
+<span class="p">)</span>
+
+<span class="c1"># Monitor for drift</span>
+<span class="k">for</span> <span class="n">new_batch</span> <span class="ow">in</span> <span class="n">data_stream</span><span class="p">:</span>
+    <span class="n">drift_detected</span> <span class="o">=</span> <span class="n">drift_detector</span><span class="o">.</span><span class="n">detect_drift</span><span class="p">(</span><span class="n">new_batch</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">drift_detected</span><span class="p">:</span>
+        <span class="n">drift_info</span> <span class="o">=</span> <span class="n">drift_detector</span><span class="o">.</span><span class="n">get_drift_info</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Drift detected: </span><span class="si">{</span><span class="n">drift_info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="production-pipeline">
+<h2>Production Pipeline<a class="headerlink" href="#production-pipeline" title="Link to this heading">¶</a></h2>
+<section id="model-deployment">
+<h3>Model Deployment<a class="headerlink" href="#model-deployment" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.production_pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProductionPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.deployment_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeploymentConfig</span>
+
+<span class="c1"># Configure deployment</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">DeploymentConfig</span><span class="p">(</span>
+    <span class="n">model_validation_threshold</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
+    <span class="n">performance_monitoring</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">auto_retraining</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">model_versioning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">logging_level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Create production pipeline</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">ProductionPipeline</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Deploy model</span>
+<span class="n">model_id</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">train_and_deploy</span><span class="p">(</span>
+    <span class="n">training_data</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span>
+    <span class="n">validation_data</span><span class="o">=</span><span class="n">X_val</span><span class="p">,</span>
+    <span class="n">model_params</span><span class="o">=</span><span class="n">optimized_params</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="model-monitoring">
+<h3>Model Monitoring<a class="headerlink" href="#model-monitoring" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Monitor model performance</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">monitor_performance</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+
+<span class="c1"># Check for performance degradation</span>
+<span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;current_score&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;baseline_score&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Performance degradation detected&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Trigger retraining</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">trigger_retraining</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">new_training_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="model-versioning">
+<h3>Model Versioning<a class="headerlink" href="#model-versioning" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># List available models</span>
+<span class="n">models</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">list_models</span><span class="p">()</span>
+
+<span class="c1"># Load specific model version</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.2.0&#39;</span><span class="p">)</span>
+
+<span class="c1"># Compare model versions</span>
+<span class="n">comparison</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">compare_models</span><span class="p">([</span><span class="s1">&#39;1.1.0&#39;</span><span class="p">,</span> <span class="s1">&#39;1.2.0&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-optimization">
+<h2>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading">¶</a></h2>
+<section id="memory-management">
+<h3>Memory Management<a class="headerlink" href="#memory-management" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configure memory-efficient processing</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+    <span class="n">memory_efficient</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">cache_strategy</span><span class="o">=</span><span class="s1">&#39;lru&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Monitor memory usage</span>
+<span class="n">memory_stats</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">get_memory_statistics</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="parallel-processing">
+<h3>Parallel Processing<a class="headerlink" href="#parallel-processing" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable parallel processing</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Use all available cores</span>
+    <span class="n">parallel_backend</span><span class="o">=</span><span class="s1">&#39;threading&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Configure ensemble parallel processing</span>
+<span class="n">ensemble</span> <span class="o">=</span> <span class="n">ConsensusClusteringEngine</span><span class="p">(</span>
+    <span class="n">parallel_execution</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="gpu-acceleration">
+<h3>GPU Acceleration<a class="headerlink" href="#gpu-acceleration" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable GPU acceleration (if available)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+        <span class="n">use_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">gpu_memory_limit</span><span class="o">=</span><span class="s1">&#39;4GB&#39;</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GPU acceleration not available, falling back to CPU&quot;</span><span class="p">)</span>
+    <span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span><span class="n">use_gpu</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="extensibility-and-customization">
+<h2>Extensibility and Customization<a class="headerlink" href="#extensibility-and-customization" title="Link to this heading">¶</a></h2>
+<section id="custom-distance-metrics">
+<h3>Custom Distance Metrics<a class="headerlink" href="#custom-distance-metrics" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics.pairwise</span><span class="w"> </span><span class="kn">import</span> <span class="n">pairwise_distances</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">custom_distance_metric</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom distance metric implementation.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pairwise_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;manhattan&#39;</span><span class="p">)</span>
+
+<span class="c1"># Use custom metric</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+    <span class="n">metric</span><span class="o">=</span><span class="n">custom_distance_metric</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-optimization-objectives">
+<h3>Custom Optimization Objectives<a class="headerlink" href="#custom-optimization-objectives" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">custom_objective_function</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom optimization objective.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">silhouette_score</span><span class="p">,</span> <span class="n">calinski_harabasz_score</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span>
+    
+    <span class="n">silhouette</span> <span class="o">=</span> <span class="n">silhouette_score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="n">calinski</span> <span class="o">=</span> <span class="n">calinski_harabasz_score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    
+    <span class="c1"># Custom weighted combination</span>
+    <span class="k">return</span> <span class="mf">0.7</span> <span class="o">*</span> <span class="n">silhouette</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="p">(</span><span class="n">calinski</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="c1"># Use custom objective</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">BayesianOptimizer</span><span class="p">(</span><span class="n">objective_function</span><span class="o">=</span><span class="n">custom_objective_function</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="plugin-architecture">
+<h3>Plugin Architecture<a class="headerlink" href="#plugin-architecture" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PluginManager</span>
+
+<span class="c1"># Register custom plugin</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomPreprocessor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="c1"># Custom preprocessing logic</span>
+        <span class="k">return</span> <span class="n">processed_X</span>
+
+<span class="c1"># Register and use plugin</span>
+<span class="n">plugin_manager</span> <span class="o">=</span> <span class="n">PluginManager</span><span class="p">()</span>
+<span class="n">plugin_manager</span><span class="o">.</span><span class="n">register_plugin</span><span class="p">(</span><span class="s1">&#39;preprocessor&#39;</span><span class="p">,</span> <span class="n">CustomPreprocessor</span><span class="p">())</span>
+
+<span class="c1"># Use in clustering pipeline</span>
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span>
+    <span class="n">plugins</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;custom_preprocessor&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="integration-with-external-libraries">
+<h2>Integration with External Libraries<a class="headerlink" href="#integration-with-external-libraries" title="Link to this heading">¶</a></h2>
+<section id="scikit-learn-integration">
+<h3>Scikit-learn Integration<a class="headerlink" href="#scikit-learn-integration" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridSearchCV</span>
+
+<span class="c1"># Create sklearn pipeline</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;scaler&#39;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()),</span>
+    <span class="p">(</span><span class="s1">&#39;clusterer&#39;</span><span class="p">,</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">())</span>
+<span class="p">])</span>
+
+<span class="c1"># Grid search with sklearn</span>
+<span class="n">param_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;clusterer__eps&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="s1">&#39;clusterer__min_samples&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span>
+    <span class="n">pipeline</span><span class="p">,</span> 
+    <span class="n">param_grid</span><span class="p">,</span> 
+    <span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;adjusted_rand_score&#39;</span><span class="p">,</span>
+    <span class="n">cv</span><span class="o">=</span><span class="mi">5</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="dask-integration-for-large-datasets">
+<h3>Dask Integration for Large Datasets<a class="headerlink" href="#dask-integration-for-large-datasets" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dask.dataframe</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.distributed</span><span class="w"> </span><span class="kn">import</span> <span class="n">DaskDBSCAN</span>
+
+<span class="c1"># Load large dataset with Dask</span>
+<span class="n">large_dataset</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;large_dataset.csv&#39;</span><span class="p">)</span>
+
+<span class="c1"># Distributed clustering</span>
+<span class="n">dask_clusterer</span> <span class="o">=</span> <span class="n">DaskDBSCAN</span><span class="p">(</span>
+    <span class="n">base_clusterer</span><span class="o">=</span><span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(),</span>
+    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">10000</span>
+<span class="p">)</span>
+
+<span class="c1"># Fit on distributed data</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">dask_clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">large_dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="debugging-and-diagnostics">
+<h2>Debugging and Diagnostics<a class="headerlink" href="#debugging-and-diagnostics" title="Link to this heading">¶</a></h2>
+<section id="verbose-logging">
+<h3>Verbose Logging<a class="headerlink" href="#verbose-logging" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Enable detailed logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Access diagnostic information</span>
+<span class="n">diagnostics</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">get_diagnostics</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="performance-profiling">
+<h3>Performance Profiling<a class="headerlink" href="#performance-profiling" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.profiling</span><span class="w"> </span><span class="kn">import</span> <span class="n">PerformanceProfiler</span>
+
+<span class="c1"># Create profiler</span>
+<span class="n">profiler</span> <span class="o">=</span> <span class="n">PerformanceProfiler</span><span class="p">()</span>
+
+<span class="c1"># Profile clustering operation</span>
+<span class="k">with</span> <span class="n">profiler</span><span class="p">:</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Get profiling results</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">profiler</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+<span class="n">profiler</span><span class="o">.</span><span class="n">plot_profile</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="validation-and-testing">
+<h3>Validation and Testing<a class="headerlink" href="#validation-and-testing" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enhanced_adaptive_dbscan.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClusteringValidator</span>
+
+<span class="c1"># Create validator</span>
+<span class="n">validator</span> <span class="o">=</span> <span class="n">ClusteringValidator</span><span class="p">()</span>
+
+<span class="c1"># Validate clustering results</span>
+<span class="n">validation_report</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">validate_clustering</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> 
+    <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;connectivity&#39;</span><span class="p">,</span> <span class="s1">&#39;stability&#39;</span><span class="p">,</span> <span class="s1">&#39;quality&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Run comprehensive tests</span>
+<span class="n">test_results</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">run_diagnostic_tests</span><span class="p">(</span><span class="n">clusterer</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This advanced features guide provides comprehensive coverage of the framework’s sophisticated capabilities. Each feature is designed to work seamlessly with the core clustering engine while providing extensive customization options.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">enhanced_adaptive_dbscan</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#adaptive-parameter-optimization">Adaptive Parameter Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-density-clustering-mdbscan">Multi-Density Clustering (MDBSCAN)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ensemble-clustering">Ensemble Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#streaming-and-real-time-processing">Streaming and Real-Time Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#production-pipeline">Production Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-optimization">Performance Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extensibility-and-customization">Extensibility and Customization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-with-external-libraries">Integration with External Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging-and-diagnostics">Debugging and Diagnostics</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/core.html">Core API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/algorithms.html">Algorithm Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/optimization.html">Optimization Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/production.html">Production Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="usage_examples.html" title="previous chapter">Usage Examples</a></li>
+      <li>Next: <a href="api/core.html" title="next chapter">Core API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Michael Kennedy.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/advanced_features.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

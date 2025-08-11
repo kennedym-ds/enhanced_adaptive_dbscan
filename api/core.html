@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Core API Reference &#8212; enhanced_adaptive_dbscan November 2024 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=d3eb9a3c"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Algorithm Reference" href="algorithms.html" />
+    <link rel="prev" title="Advanced Features" href="../advanced_features.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="core-api-reference">
+<h1>Core API Reference<a class="headerlink" href="#core-api-reference" title="Link to this heading">¶</a></h1>
+<p>This section documents the core components of the Enhanced Adaptive DBSCAN framework.</p>
+<section id="enhancedadaptivedbscan">
+<h2>EnhancedAdaptiveDBSCAN<a class="headerlink" href="#enhancedadaptivedbscan" title="Link to this heading">¶</a></h2>
+<p>The main clustering class that extends DBSCAN with adaptive capabilities.</p>
+<section id="class-definition">
+<h3>Class Definition<a class="headerlink" href="#class-definition" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">EnhancedAdaptiveDBSCAN</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Enhanced Adaptive DBSCAN clustering algorithm.</span>
+<span class="sd">    </span>
+<span class="sd">    This class implements an advanced version of DBSCAN that includes:</span>
+<span class="sd">    - Adaptive parameter selection</span>
+<span class="sd">    - Multi-density region handling</span>
+<span class="sd">    - Hierarchical clustering analysis</span>
+<span class="sd">    - Ensemble methods integration</span>
+<span class="sd">    - Production-ready features</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    eps : float, default=0.5</span>
+<span class="sd">        The maximum distance between two samples for one to be considered</span>
+<span class="sd">        as in the neighborhood of the other.</span>
+<span class="sd">        </span>
+<span class="sd">    min_samples : int, default=5</span>
+<span class="sd">        The number of samples in a neighborhood for a point to be considered</span>
+<span class="sd">        as a core point.</span>
+<span class="sd">        </span>
+<span class="sd">    adaptive : bool, default=True</span>
+<span class="sd">        Whether to use adaptive parameter selection.</span>
+<span class="sd">        </span>
+<span class="sd">    enable_mdbscan : bool, default=False</span>
+<span class="sd">        Whether to enable multi-density DBSCAN features.</span>
+<span class="sd">        </span>
+<span class="sd">    algorithm : {&#39;auto&#39;, &#39;ball_tree&#39;, &#39;kd_tree&#39;, &#39;brute&#39;}, default=&#39;auto&#39;</span>
+<span class="sd">        The algorithm to be used by NearestNeighbors.</span>
+<span class="sd">        </span>
+<span class="sd">    leaf_size : int, default=30</span>
+<span class="sd">        Leaf size passed to BallTree or KDTree.</span>
+<span class="sd">        </span>
+<span class="sd">    metric : str or callable, default=&#39;euclidean&#39;</span>
+<span class="sd">        The metric to use when calculating distance between instances.</span>
+<span class="sd">        </span>
+<span class="sd">    n_jobs : int, default=None</span>
+<span class="sd">        The number of parallel jobs to run.</span>
+<span class="sd">        </span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    labels_ : ndarray of shape (n_samples,)</span>
+<span class="sd">        Cluster labels for each point in the dataset given to fit().</span>
+<span class="sd">        </span>
+<span class="sd">    core_sample_indices_ : ndarray of shape (n_core_samples,)</span>
+<span class="sd">        Indices of core samples.</span>
+<span class="sd">        </span>
+<span class="sd">    n_features_in_ : int</span>
+<span class="sd">        Number of features seen during fit.</span>
+<span class="sd">        </span>
+<span class="sd">    feature_names_in_ : ndarray of shape (n_features_in_,)</span>
+<span class="sd">        Names of features seen during fit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">eps</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">min_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">adaptive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">enable_mdbscan</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+        <span class="n">leaf_size</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h3>
+<section id="fit-x-y-none">
+<h4>fit(X, y=None)<a class="headerlink" href="#fit-x-y-none" title="Link to this heading">¶</a></h4>
+<p>Fit the clustering algorithm to the data.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> : array-like of shape (n_samples, n_features)
+Training data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> : Ignored
+Not used, present for API consistency.</p></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">self</span></code> : object
+Returns the instance itself.</p></li>
+</ul>
+</section>
+<section id="predict-x">
+<h4>predict(X)<a class="headerlink" href="#predict-x" title="Link to this heading">¶</a></h4>
+<p>Predict cluster labels for new data points.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> : array-like of shape (n_samples, n_features)
+New data to predict.</p></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code> : ndarray of shape (n_samples,)
+Cluster labels for each sample.</p></li>
+</ul>
+</section>
+<section id="fit-predict-x-y-none">
+<h4>fit_predict(X, y=None)<a class="headerlink" href="#fit-predict-x-y-none" title="Link to this heading">¶</a></h4>
+<p>Fit the model and predict cluster labels in one step.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> : array-like of shape (n_samples, n_features)
+Training data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> : Ignored
+Not used, present for API consistency.</p></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code> : ndarray of shape (n_samples,)
+Cluster labels for each sample.</p></li>
+</ul>
+</section>
+<section id="plot-x-none-labels-none-title-none-figsize-10-8-kwargs">
+<h4>plot(X=None, labels=None, title=None, figsize=(10, 8), **kwargs)<a class="headerlink" href="#plot-x-none-labels-none-title-none-figsize-10-8-kwargs" title="Link to this heading">¶</a></h4>
+<p>Visualize clustering results.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> : array-like, optional
+Data to plot. If None, uses data from last fit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code> : array-like, optional
+Cluster labels. If None, uses labels from last fit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">title</span></code> : str, optional
+Plot title.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">figsize</span></code> : tuple, default=(10, 8)
+Figure size.</p></li>
+</ul>
+</section>
+<section id="evaluate-x-none-labels-none-metrics-none">
+<h4>evaluate(X=None, labels=None, metrics=None)<a class="headerlink" href="#evaluate-x-none-labels-none-metrics-none" title="Link to this heading">¶</a></h4>
+<p>Evaluate clustering performance.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> : array-like, optional
+Data to evaluate. If None, uses data from last fit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">labels</span></code> : array-like, optional
+True labels for evaluation. If None, uses internal metrics.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metrics</span></code> : list, optional
+Metrics to compute. If None, uses default metrics.</p></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">results</span></code> : dict
+Dictionary containing evaluation metrics.</p></li>
+</ul>
+</section>
+<section id="get-params-deep-true">
+<h4>get_params(deep=True)<a class="headerlink" href="#get-params-deep-true" title="Link to this heading">¶</a></h4>
+<p>Get parameters for this estimator.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">deep</span></code> : bool, default=True
+If True, return parameters for sub-estimators too.</p></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">params</span></code> : dict
+Parameter names mapped to their values.</p></li>
+</ul>
+</section>
+<section id="set-params-params">
+<h4>set_params(**params)<a class="headerlink" href="#set-params-params" title="Link to this heading">¶</a></h4>
+<p>Set parameters for this estimator.</p>
+<p><strong>Parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">**params</span></code> : dict
+Estimator parameters.</p></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">self</span></code> : estimator instance
+Estimator instance.</p></li>
+</ul>
+</section>
+</section>
+<section id="properties">
+<h3>Properties<a class="headerlink" href="#properties" title="Link to this heading">¶</a></h3>
+<section id="labels">
+<h4>labels_<a class="headerlink" href="#labels" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">labels_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cluster labels for each point in the dataset.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span>
+</pre></div>
+</div>
+</section>
+<section id="core-sample-indices">
+<h4>core_sample_indices_<a class="headerlink" href="#core-sample-indices" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">core_sample_indices_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Indices of core samples.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core_sample_indices</span>
+</pre></div>
+</div>
+</section>
+<section id="n-clusters">
+<h4>n_clusters_<a class="headerlink" href="#n-clusters" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">n_clusters_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of clusters found.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_labels&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="n-noise">
+<h4>n_noise_<a class="headerlink" href="#n-noise" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">n_noise_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of noise points.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_labels&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="multi-density-components">
+<h2>Multi-Density Components<a class="headerlink" href="#multi-density-components" title="Link to this heading">¶</a></h2>
+<section id="multidensityclusterengine">
+<h3>MultiDensityClusterEngine<a class="headerlink" href="#multidensityclusterengine" title="Link to this heading">¶</a></h3>
+<p>Handles clustering in regions with varying densities.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MultiDensityClusterEngine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Engine for handling multi-density clustering scenarios.</span>
+<span class="sd">    </span>
+<span class="sd">    This component automatically identifies regions with different</span>
+<span class="sd">    densities and applies appropriate clustering parameters for each region.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_clusterer</span><span class="p">,</span> <span class="n">density_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_clusterer</span> <span class="o">=</span> <span class="n">base_clusterer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">density_threshold</span> <span class="o">=</span> <span class="n">density_threshold</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit clustering with multi-density support.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">identify_density_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Identify regions with different densities.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="hierarchicaldensitymanager">
+<h3>HierarchicalDensityManager<a class="headerlink" href="#hierarchicaldensitymanager" title="Link to this heading">¶</a></h3>
+<p>Manages hierarchical clustering analysis across different scales.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HierarchicalDensityManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manages hierarchical density analysis for stable cluster selection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hierarchy_method</span><span class="o">=</span><span class="s1">&#39;single&#39;</span><span class="p">,</span> <span class="n">stability_threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hierarchy_method</span> <span class="o">=</span> <span class="n">hierarchy_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stability_threshold</span> <span class="o">=</span> <span class="n">stability_threshold</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_hierarchy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build hierarchical clustering structure.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_stable_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select most stable clusters from hierarchy.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="adaptive-optimization-components">
+<h2>Adaptive Optimization Components<a class="headerlink" href="#adaptive-optimization-components" title="Link to this heading">¶</a></h2>
+<section id="adaptivetuningengine">
+<h3>AdaptiveTuningEngine<a class="headerlink" href="#adaptivetuningengine" title="Link to this heading">¶</a></h3>
+<p>Main engine for parameter optimization.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">AdaptiveTuningEngine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adaptive parameter tuning engine using various optimization strategies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimization_strategy</span><span class="o">=</span><span class="s1">&#39;bayesian&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimization_strategy</span> <span class="o">=</span> <span class="n">optimization_strategy</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Optimize clustering parameters for given dataset.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="bayesianoptimizer">
+<h3>BayesianOptimizer<a class="headerlink" href="#bayesianoptimizer" title="Link to this heading">¶</a></h3>
+<p>Bayesian optimization for parameter tuning.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BayesianOptimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bayesian optimization for efficient parameter search.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">acquisition_function</span><span class="o">=</span><span class="s1">&#39;expected_improvement&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acquisition_function</span> <span class="o">=</span> <span class="n">acquisition_function</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run Bayesian optimization.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ensemble-components">
+<h2>Ensemble Components<a class="headerlink" href="#ensemble-components" title="Link to this heading">¶</a></h2>
+<section id="consensusclusteringengine">
+<h3>ConsensusClusteringEngine<a class="headerlink" href="#consensusclusteringengine" title="Link to this heading">¶</a></h3>
+<p>Main ensemble clustering engine.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConsensusClusteringEngine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Consensus clustering engine that combines multiple clustering results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_clusterer</span><span class="p">,</span> <span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_clusterer</span> <span class="o">=</span> <span class="n">base_clusterer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="n">n_estimators</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_consensus_clustering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit consensus clustering using ensemble of clusterers.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="utility-functions">
+<h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Link to this heading">¶</a></h2>
+<section id="data-preprocessing">
+<h3>Data Preprocessing<a class="headerlink" href="#data-preprocessing" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">preprocess_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">,</span> <span class="n">handle_outliers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Preprocess data for clustering.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : array-like</span>
+<span class="sd">        Input data</span>
+<span class="sd">    scaling : str, default=&#39;standard&#39;</span>
+<span class="sd">        Scaling method (&#39;standard&#39;, &#39;minmax&#39;, &#39;robust&#39;, &#39;none&#39;)</span>
+<span class="sd">    handle_outliers : bool, default=True</span>
+<span class="sd">        Whether to handle outliers</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X_processed : array-like</span>
+<span class="sd">        Processed data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluation-metrics">
+<h3>Evaluation Metrics<a class="headerlink" href="#evaluation-metrics" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compute_clustering_metrics</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">true_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute comprehensive clustering evaluation metrics.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : array-like</span>
+<span class="sd">        Data points</span>
+<span class="sd">    labels : array-like</span>
+<span class="sd">        Predicted cluster labels</span>
+<span class="sd">    true_labels : array-like, optional</span>
+<span class="sd">        True cluster labels for supervised metrics</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    metrics : dict</span>
+<span class="sd">        Dictionary of computed metrics</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="visualization-utilities">
+<h3>Visualization Utilities<a class="headerlink" href="#visualization-utilities" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_clustering_results</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot clustering results with optional cluster centers.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : array-like</span>
+<span class="sd">        Data points</span>
+<span class="sd">    labels : array-like</span>
+<span class="sd">        Cluster labels</span>
+<span class="sd">    centers : array-like, optional</span>
+<span class="sd">        Cluster centers</span>
+<span class="sd">    title : str, optional</span>
+<span class="sd">        Plot title</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_parameter_optimization</span><span class="p">(</span><span class="n">optimization_history</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot parameter optimization progress.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimization_history : dict</span>
+<span class="sd">        Optimization history containing parameters and scores</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>This core API documentation provides comprehensive coverage of the main framework components. For detailed implementation examples, see the Usage Examples section.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">enhanced_adaptive_dbscan</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage_examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_features.html">Advanced Features</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#enhancedadaptivedbscan">EnhancedAdaptiveDBSCAN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-density-components">Multi-Density Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adaptive-optimization-components">Adaptive Optimization Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ensemble-components">Ensemble Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithm Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../advanced_features.html" title="previous chapter">Advanced Features</a></li>
+      <li>Next: <a href="algorithms.html" title="next chapter">Algorithm Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Michael Kennedy.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/api/core.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
