@@ -1,0 +1,103 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enhanced_adaptive_dbscan"
+version = "0.1.1"
+description = "Enhanced Adaptive DBSCAN clustering algorithm with stability-based selection and incremental updates"
+readme = { file = "README.rst", content-type = "text/x-rst" }
+authors = [{ name = "Michael Kennedy", email = "michael.patrick.kennedy@outlook.ie" }]
+license = { text = "MIT" }
+requires-python = ">=3.8"
+keywords = ["clustering", "dbscan", "density-based", "adaptive", "wafer", "semiconductor", "scikit-learn", "kdtree"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "numpy>=1.26,<3.0",
+  "scikit-learn>=1.5,<1.7",
+  "plotly>=5.24,<6.0",
+  "joblib>=1.3,<2.0",
+  "pandas>=2.2,<3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "mypy",
+  "types-setuptools",
+  "sphinx",
+  "sphinxcontrib-mermaid",
+  "myst-parser",
+  "wheel",
+  "pre-commit"
+]
+test = [
+  "pytest",
+  "pytest-cov"
+]
+docs = [
+  "sphinx",
+  "sphinxcontrib-mermaid",
+  "myst-parser"
+]
+
+[project.urls]
+Homepage = "https://github.com/kennedym-ds/enhanced_adaptive_dbscan"
+Repository = "https://github.com/kennedym-ds/enhanced_adaptive_dbscan"
+Issues = "https://github.com/kennedym-ds/enhanced_adaptive_dbscan/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["enhanced_adaptive_dbscan*"]
+
+[tool.ruff]
+line-length = 100
+fix = true
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "PL"]
+ignore = [
+  "E203",  # whitespace before ':'
+  "E501",  # line too long (handled by formatter)
+]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.8"
+warn_unused_ignores = true
+disallow_untyped_defs = false  # Start lenient, ratchet up later
+no_implicit_optional = true
+check_untyped_defs = true
+exclude = ["build/", "dist/", "docs/"]
+
+[[tool.mypy.overrides]]
+module = [
+  "numpy.*",
+  "pandas.*", 
+  "plotly.*",
+  "sklearn.*",
+  "joblib.*"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+  "-ra"
+]

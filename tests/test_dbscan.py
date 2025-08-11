@@ -41,6 +41,15 @@ class TestEnhancedAdaptiveDBSCAN(unittest.TestCase):
         self.assertEqual(len(labels), len(self.X_full), "Labels length mismatch.")
         self.assertTrue(len(set(labels)) > 1, "Should detect multiple clusters.")
 
+        # sklearn estimator attribute should exist after _validate_data
+        self.assertTrue(hasattr(self.model, 'n_features_in_'))
+
+    def test_fit_predict_api(self):
+        # Fit via sklearn ClusterMixin API
+        labels = self.model.fit_predict(self.X_full, additional_attributes=self.X_full[:, 2].reshape(-1, 1))
+        self.assertEqual(labels.shape[0], self.X_full.shape[0])
+        self.assertTrue(hasattr(self.model, 'labels_'))
+
     def test_incremental_fit(self):
         # Fit initial data
         self.model.fit(self.X_full, additional_attributes=self.X_full[:, 2].reshape(-1, 1))
@@ -72,6 +81,12 @@ class TestEnhancedAdaptiveDBSCAN(unittest.TestCase):
         self.model.fit(X_single, additional_attributes=np.array([[5]]))
         labels = self.model.labels_
         self.assertEqual(labels[0], -1, "Single point should be labeled as noise.")
+
+    def test_missing_additional_attributes_raises(self):
+        # When additional_features are configured, additional_attributes must be provided
+        X = self.X_full.copy()
+        with self.assertRaises(ValueError):
+            self.model.fit(X, additional_attributes=None)
 
 if __name__ == '__main__':
     unittest.main()

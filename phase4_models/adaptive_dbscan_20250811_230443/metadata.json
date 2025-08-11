@@ -1,0 +1,36 @@
+{
+  "model_id": "adaptive_dbscan_20250811_230443",
+  "model_type": "adaptive_dbscan",
+  "version": "1.0.0",
+  "created_at": "2025-08-11T23:04:43.115706",
+  "trained_on": "dataset_size_300",
+  "parameters": {
+    "k": 15,
+    "min_scaling": 5,
+    "density_scaling": 1.2
+  },
+  "performance_metrics": {
+    "training_time": 4.2383081912994385
+  },
+  "deployment_config": {
+    "model_name": "production_clustering_model",
+    "version": "1.0.0",
+    "environment": "production",
+    "auto_scaling": true,
+    "max_concurrent_requests": 50,
+    "health_check_interval": 60,
+    "model_store_path": "./phase4_models",
+    "metrics_store_path": "./phase4_metrics",
+    "logging_level": "INFO",
+    "backup_retention_days": 30
+  },
+  "validation_results": {
+    "n_clusters": 3,
+    "noise_ratio": 0.0033333333333333335,
+    "total_points": 300,
+    "silhouette_score": 0.827191710341817,
+    "davies_bouldin_score": 0.2402415750127759,
+    "passed_validation": true,
+    "validation_timestamp": "2025-08-11T23:04:43.115706"
+  }
+}

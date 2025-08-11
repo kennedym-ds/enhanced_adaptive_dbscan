@@ -7,20 +7,42 @@ from collections import deque, defaultdict
 from joblib import Parallel, delayed
 from sklearn.metrics import silhouette_score, davies_bouldin_score
 from sklearn.preprocessing import StandardScaler
+from sklearn.base import BaseEstimator, ClusterMixin
+from sklearn.utils.validation import check_is_fitted
 import logging
-import warnings
 
-from .utils import count_neighbors
+from .utils import count_neighbors, neighbors_for_point
+from .density_engine import MultiScaleDensityEngine, DensityAnalysis
+from .multi_density_clustering import MultiDensityClusterEngine, HierarchicalDensityManager, ClusterRegion, ClusterHierarchy
+from .boundary_processor import EnhancedBoundaryProcessor, BoundaryAnalysis
+from .cluster_quality_analyzer import ClusterQualityAnalyzer, QualityAnalysisResult
 
-warnings.filterwarnings("ignore")
+# Module-level logger for library usage; configuration is responsibility of the application
+logger = logging.getLogger(__name__)
 
-class EnhancedAdaptiveDBSCAN:
-    def __init__(self, wafer_shape='circular', wafer_size=100, k=20, density_scaling=1.0,
-                 buffer_ratio=0.1, min_scaling=5, max_scaling=10, n_jobs=-1,
-                 max_points=100000, subsample_ratio=0.1, random_state=42,
-                 additional_features=None, feature_weights=None, stability_threshold=0.5):
+class EnhancedAdaptiveDBSCAN(BaseEstimator, ClusterMixin):
+    def __init__(self, wafer_shape: str = 'circular', wafer_size: float = 100, k: int = 20,
+                 density_scaling: float = 1.0, buffer_ratio: float = 0.1,
+                 min_scaling: int = 5, max_scaling: int = 10, n_jobs: int = -1,
+                 max_points: int = 100000, subsample_ratio: float = 0.1, random_state: int = 42,
+                 additional_features=None, feature_weights=None, stability_threshold: float = 0.5,
+                 enable_multi_scale_density: bool = False, 
+                 low_density_threshold: float = 0.3, high_density_threshold: float = 0.7,
+                 # Phase 2 MDBSCAN Parameters
+                 enable_mdbscan: bool = False,
+                 min_cluster_size: int = 3,
+                 noise_tolerance: float = 0.1,
+                 merge_threshold: float = 0.3,
+                 enable_cross_region_merging: bool = True,
+                 enable_hierarchical_clustering: bool = False,
+                 max_hierarchy_levels: int = 5,
+                 hierarchy_stability_threshold: float = 0.6,
+                 enable_boundary_refinement: bool = False,
+                 boundary_sensitivity: float = 0.5,
+                 enable_quality_analysis: bool = False,
+                 quality_threshold: float = 0.6):
         """
-        Initialize the Enhanced Adaptive DBSCAN with Stability-Based Clustering.
+        Initialize the Enhanced Adaptive DBSCAN with Stability-Based Clustering and MDBSCAN capabilities.
 
         Parameters:
         - wafer_shape (str): Shape of the wafer ('circular' or 'square').
@@ -37,6 +59,23 @@ class EnhancedAdaptiveDBSCAN:
         - additional_features (list or None): List of additional feature indices to include in clustering.
         - feature_weights (list or None): Weights for additional features to balance their influence.
         - stability_threshold (float): Minimum stability score to retain a cluster.
+        - enable_multi_scale_density (bool): Enable multi-scale density analysis engine for enhanced performance.
+        - low_density_threshold (float): Percentile threshold for low density regions (when multi-scale enabled).
+        - high_density_threshold (float): Percentile threshold for high density regions (when multi-scale enabled).
+        
+        Phase 2 MDBSCAN Parameters:
+        - enable_mdbscan (bool): Enable MDBSCAN multi-density clustering techniques.
+        - min_cluster_size (int): Minimum points required to form a cluster.
+        - noise_tolerance (float): Tolerance for noise point classification.
+        - merge_threshold (float): Threshold for cross-region cluster merging.
+        - enable_cross_region_merging (bool): Whether to enable cluster merging across regions.
+        - enable_hierarchical_clustering (bool): Enable hierarchical density management.
+        - max_hierarchy_levels (int): Maximum number of hierarchy levels.
+        - hierarchy_stability_threshold (float): Minimum stability for hierarchy retention.
+        - enable_boundary_refinement (bool): Enable enhanced boundary processing.
+        - boundary_sensitivity (float): Sensitivity to boundary detection (0.0-1.0).
+        - enable_quality_analysis (bool): Enable comprehensive cluster quality analysis.
+        - quality_threshold (float): Minimum acceptable quality score.
         """
         self.wafer_shape = wafer_shape
         self.wafer_size = wafer_size
@@ -52,22 +91,104 @@ class EnhancedAdaptiveDBSCAN:
         self.additional_features = additional_features
         self.feature_weights = feature_weights
         self.stability_threshold = stability_threshold
+        self.enable_multi_scale_density = enable_multi_scale_density
+        self.low_density_threshold = low_density_threshold
+        self.high_density_threshold = high_density_threshold
+        
+        # Phase 2 MDBSCAN Parameters
+        self.enable_mdbscan = enable_mdbscan
+        self.min_cluster_size = min_cluster_size
+        self.noise_tolerance = noise_tolerance
+        self.merge_threshold = merge_threshold
+        self.enable_cross_region_merging = enable_cross_region_merging
+        self.enable_hierarchical_clustering = enable_hierarchical_clustering
+        self.max_hierarchy_levels = max_hierarchy_levels
+        self.hierarchy_stability_threshold = hierarchy_stability_threshold
+        self.enable_boundary_refinement = enable_boundary_refinement
+        self.boundary_sensitivity = boundary_sensitivity
+        self.enable_quality_analysis = enable_quality_analysis
+        self.quality_threshold = quality_threshold
 
-        # Initialize logging
-        self.logger = logging.getLogger('EnhancedAdaptiveDBSCAN')
-        self.logger.setLevel(logging.INFO)
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('[%(levelname)s] %(message)s')
-        handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
+        # Reference module logger (handlers/levels should be configured by the app using this library)
+        self.logger = logging.getLogger(__name__)
 
-        # Initialize other attributes
-        self.labels_ = None
+        # Initialize other attributes (learned attrs like labels_ are set during fit)
         self.scaler_ = None
         self.cluster_stability_ = {}    # {cluster_label: stability_score}
         self.cluster_centers_ = {}      # {cluster_label: centroid}
         self.cluster_sizes_ = defaultdict(int)  # {cluster_label: size}
+
+        # Initialize Multi-Scale Density Engine if enabled
+        if self.enable_multi_scale_density:
+            self.density_engine_ = MultiScaleDensityEngine(
+                k=self.k,
+                density_bins=50,
+                low_density_threshold=self.low_density_threshold,
+                high_density_threshold=self.high_density_threshold,
+                boundary_tolerance=0.1,
+                enable_stability_analysis=True
+            )
+            # Storage for density analysis results
+            self.density_analysis_ = None
+            self.region_parameters_ = None
+        else:
+            self.density_engine_ = None
+            self.density_analysis_ = None
+            self.region_parameters_ = None
+
+        # Initialize Phase 2 MDBSCAN Components if enabled
+        if self.enable_mdbscan:
+            self.multi_density_engine_ = MultiDensityClusterEngine(
+                min_cluster_size=self.min_cluster_size,
+                noise_tolerance=self.noise_tolerance,
+                merge_threshold=self.merge_threshold,
+                enable_cross_region_merging=self.enable_cross_region_merging
+            )
+            
+            if self.enable_hierarchical_clustering:
+                self.hierarchical_manager_ = HierarchicalDensityManager(
+                    max_levels=self.max_hierarchy_levels,
+                    stability_threshold=self.hierarchy_stability_threshold,
+                    min_cluster_persistence=2
+                )
+            else:
+                self.hierarchical_manager_ = None
+            
+            if self.enable_boundary_refinement:
+                self.boundary_processor_ = EnhancedBoundaryProcessor(
+                    boundary_sensitivity=self.boundary_sensitivity,
+                    transition_threshold=0.3,
+                    min_boundary_confidence=0.6,
+                    enable_adaptive_refinement=True
+                )
+            else:
+                self.boundary_processor_ = None
+                
+            if self.enable_quality_analysis:
+                self.quality_analyzer_ = ClusterQualityAnalyzer(
+                    quality_threshold=self.quality_threshold,
+                    silhouette_weight=0.3,
+                    separation_weight=0.25,
+                    compactness_weight=0.25,
+                    stability_weight=0.2
+                )
+            else:
+                self.quality_analyzer_ = None
+                
+            # Storage for MDBSCAN results
+            self.mdbscan_clusters_ = None
+            self.cluster_hierarchy_ = None
+            self.boundary_analysis_ = None
+            self.quality_analysis_ = None
+        else:
+            self.multi_density_engine_ = None
+            self.hierarchical_manager_ = None
+            self.boundary_processor_ = None
+            self.quality_analyzer_ = None
+            self.mdbscan_clusters_ = None
+            self.cluster_hierarchy_ = None
+            self.boundary_analysis_ = None
+            self.quality_analysis_ = None
 
         # Define wafer boundary
         self.define_boundary()
@@ -138,6 +259,53 @@ class EnhancedAdaptiveDBSCAN:
             mean_distance = distances[:, 0]
         local_density = 1 / (mean_distance + 1e-5)  # Avoid division by zero
         return local_density
+
+    def compute_multi_scale_parameters(self, X):
+        """
+        Compute adaptive parameters using multi-scale density analysis.
+        
+        This method leverages the MultiScaleDensityEngine to identify density regions
+        and compute region-specific clustering parameters for enhanced performance.
+        
+        Parameters:
+        - X (ndarray): Shape (n_samples, n_features)
+        
+        Returns:
+        - epsilon (ndarray): Shape (n_samples,)
+        - min_pts (ndarray): Shape (n_samples,)
+        """
+        if not self.enable_multi_scale_density or self.density_engine_ is None:
+            raise ValueError("Multi-scale density analysis is not enabled")
+            
+        # Perform comprehensive density analysis
+        self.density_analysis_ = self.density_engine_.analyze_density_landscape(X)
+        
+        # Generate region-specific parameters
+        base_eps = self.density_scaling
+        base_min_pts = self.min_scaling
+        
+        self.region_parameters_ = self.density_engine_.get_region_specific_parameters(
+            self.density_analysis_, base_eps, base_min_pts
+        )
+        
+        # Initialize arrays for per-point parameters
+        n_samples = X.shape[0]
+        epsilon = np.full(n_samples, base_eps, dtype=float)
+        min_pts = np.full(n_samples, base_min_pts, dtype=int)
+        
+        # Assign region-specific parameters to points
+        for region in self.density_analysis_.regions:
+            if region.region_id in self.region_parameters_:
+                params = self.region_parameters_[region.region_id]
+                epsilon[region.indices] = params['eps']
+                min_pts[region.indices] = params['min_pts']
+        
+        # Log density analysis summary
+        if self.logger.isEnabledFor(logging.INFO):
+            summary = self.density_engine_.get_analysis_summary(self.density_analysis_)
+            self.logger.info(f"Multi-scale density analysis:\n{summary}")
+            
+        return epsilon, min_pts
 
 
     def adjust_density_near_boundary(self, X, local_density):
@@ -231,7 +399,7 @@ class EnhancedAdaptiveDBSCAN:
 
         # Precompute neighbors for all points
         neighbors_list = Parallel(n_jobs=self.n_jobs)(
-            delayed(lambda i: tree.query_radius(X[i].reshape(1, -1), r=epsilon[i])[0])(i) for i in range(n_points)
+            delayed(neighbors_for_point)(tree, X, epsilon, i) for i in range(n_points)
         )
 
         for i in range(n_points):
@@ -447,7 +615,7 @@ class EnhancedAdaptiveDBSCAN:
             del self.cluster_centers_[cluster]
             del self.cluster_sizes_[cluster]
 
-    def fit(self, X, additional_attributes=None):
+    def fit(self, X, y=None, additional_attributes=None):
         """
         Fit the Enhanced Adaptive DBSCAN algorithm on data X.
 
@@ -455,10 +623,13 @@ class EnhancedAdaptiveDBSCAN:
         - X (ndarray): Shape (n_samples, n_features)
         - additional_attributes (ndarray or None): Shape (n_samples, n_additional_features)
 
-        Returns:
-        - self
-        """
-        X = np.array(X)
+    Returns:
+    - self
+    """
+        # Basic validation and set n_features_in_ / feature_names_in_
+        # Use sklearn's estimator helper to enforce 2D input and set universal attributes.
+        # Compatible with scikit-learn 1.5+ via _validate_data.
+        X = self._validate_data(X, ensure_2d=True, dtype=float, reset=True)
         n_points = X.shape[0]
 
         # Incorporate additional features if provided
@@ -487,35 +658,104 @@ class EnhancedAdaptiveDBSCAN:
         else:
             additional_attrs_sub = None
 
-        # Step 2: Local Density Estimation on Subsample
-        local_density = self.compute_local_density(X_sub)
+        # Step 2: Compute adaptive ε and MinPts on Subsample
+        if self.enable_multi_scale_density:
+            # Use multi-scale density analysis for enhanced parameter computation
+            self.logger.info("Using multi-scale density analysis for parameter optimization")
+            epsilon, min_pts = self.compute_multi_scale_parameters(X_sub)
+        else:
+            # Use traditional density estimation approach
+            # Step 2a: Local Density Estimation on Subsample
+            local_density = self.compute_local_density(X_sub)
 
-        # Step 3: Adjust density near boundaries on Subsample
-        local_density = self.adjust_density_near_boundary(X_sub, local_density)
+            # Step 2b: Adjust density near boundaries on Subsample
+            local_density = self.adjust_density_near_boundary(X_sub, local_density)
 
-        # Step 4: Compute adaptive ε and MinPts on Subsample
-        epsilon, min_pts = self.compute_adaptive_parameters(local_density, additional_attributes=additional_attrs_sub)
+            # Step 2c: Compute adaptive ε and MinPts on Subsample
+            epsilon, min_pts = self.compute_adaptive_parameters(local_density, additional_attributes=additional_attrs_sub)
 
-        # Step 5: Identify core points on Subsample
+        # Step 3: Identify core points on Subsample
         core_points = self.identify_core_points(X_sub, epsilon, min_pts)
 
-        # Step 6: Form clusters on Subsample
+        # Step 4: Form clusters on Subsample
         labels_sub = self.form_clusters(X_sub, epsilon, min_pts, core_points)
 
         # **Assign labels_sub to self.labels_**
         self.labels_ = labels_sub
 
-        # Step 7: Multi-Scale Clustering on Subsample
+        # Phase 2: MDBSCAN Multi-Density Clustering (if enabled)
+        if self.enable_mdbscan and self.density_analysis_ is not None:
+            self.logger.info("Applying MDBSCAN multi-density clustering techniques")
+            
+            # Convert traditional clusters to ClusterRegion format
+            initial_clusters = self._convert_labels_to_cluster_regions(X_sub, labels_sub)
+            self.logger.debug(f"Converted {len(initial_clusters)} traditional clusters to MDBSCAN format")
+            
+            # Step 4a: Region-aware clustering
+            region_clusters = self.multi_density_engine_.region_aware_clustering(
+                X_sub, self.density_analysis_, self.region_parameters_
+            )
+            
+            # Step 4b: Cross-region cluster merging
+            merged_clusters = self.multi_density_engine_.cross_region_cluster_merging(
+                region_clusters, self.density_analysis_
+            )
+            self.mdbscan_clusters_ = merged_clusters
+            self.logger.info(f"MDBSCAN clustering produced {len(merged_clusters)} optimized clusters")
+            
+            # Step 4c: Hierarchical clustering (if enabled)
+            if self.enable_hierarchical_clustering and self.hierarchical_manager_:
+                # Convert arrays to scalar values for hierarchical processing
+                base_eps = float(np.mean(epsilon)) if isinstance(epsilon, np.ndarray) else float(epsilon)
+                base_min_pts = int(np.round(np.mean(min_pts))) if isinstance(min_pts, np.ndarray) else int(min_pts)
+                
+                self.cluster_hierarchy_ = self.hierarchical_manager_.build_density_hierarchy(
+                    X_sub, self.density_analysis_, base_eps, base_min_pts
+                )
+                
+                # Apply stability-based pruning
+                pruned_hierarchy = self.hierarchical_manager_.stability_based_pruning(self.cluster_hierarchy_)
+                
+                # Get optimal clustering from hierarchy
+                optimal_clusters = self.hierarchical_manager_.get_optimal_clustering(pruned_hierarchy)
+                self.logger.info(f"Hierarchical clustering selected {len(optimal_clusters)} optimal clusters")
+            
+            # Step 4d: Boundary refinement (if enabled)
+            if self.enable_boundary_refinement and self.boundary_processor_:
+                self.boundary_analysis_ = self.boundary_processor_.analyze_cluster_boundaries(
+                    X_sub, merged_clusters, self.density_analysis_
+                )
+                
+                # Apply boundary-based refinements
+                refined_clusters = self.boundary_processor_.apply_boundary_refinements(
+                    merged_clusters, self.boundary_analysis_
+                )
+                self.mdbscan_clusters_ = refined_clusters
+                self.logger.info("Applied boundary refinements to improve cluster quality")
+            
+            # Step 4e: Quality analysis (if enabled)
+            if self.enable_quality_analysis and self.quality_analyzer_:
+                self.quality_analysis_ = self.quality_analyzer_.comprehensive_quality_analysis(
+                    X_sub, self.mdbscan_clusters_, self.density_analysis_, 
+                    self.boundary_analysis_, self.cluster_hierarchy_
+                )
+                self.logger.info(f"Quality analysis complete: Overall score {self.quality_analysis_.global_metrics.clustering_quality_score:.3f}")
+            
+            # Update labels with MDBSCAN results
+            self.labels_ = self.multi_density_engine_.get_cluster_assignments(X_sub, self.mdbscan_clusters_)
+            self.logger.info("Updated cluster assignments with MDBSCAN results")
+
+        # Step 5: Multi-Scale Clustering on Subsample
         scaling_factors = np.linspace(0.8, 1.2, num=5)
         epsilon_levels = [epsilon * scale for scale in scaling_factors]
         min_pts_levels = [np.round(min_pts * scale).astype(int) for scale in scaling_factors]
 
         hierarchy = self.build_hierarchy(X_sub, epsilon_levels, min_pts_levels)
 
-        # Step 8: Select stable clusters based on stability scores
+        # Step 6: Select stable clusters based on stability scores
         self.select_stable_clusters()
 
-        # Step 9: Initialize cluster centers based on stable clusters
+        # Step 7: Initialize cluster centers based on stable clusters
         stable_labels = set(self.labels_)
         stable_labels.discard(-1)  # Remove noise
 
@@ -527,7 +767,7 @@ class EnhancedAdaptiveDBSCAN:
             self.cluster_centers_[label] = centroid
             self.cluster_sizes_[label] = len(points_in_cluster)
 
-        # Step 10: Assign clusters to full dataset
+        # Step 8: Assign clusters to full dataset
         if n_points > self.max_points:
             X_full = X_processed
             X_sub_core = X_sub[self.labels_ != -1]
@@ -545,6 +785,7 @@ class EnhancedAdaptiveDBSCAN:
             # Use subsampled clusters as full clusters
             self.labels_ = labels_sub
 
+        # Finish fit
         self.logger.info("Fitting completed.")
         return self
 
@@ -600,7 +841,7 @@ class EnhancedAdaptiveDBSCAN:
         within_epsilon = distances.flatten() <= epsilon_threshold
 
         # Initialize labels list if necessary
-        if self.labels_ is None:
+        if getattr(self, "labels_", None) is None:
             self.labels_ = np.array([])
 
         # Assign labels accordingly
@@ -654,6 +895,44 @@ class EnhancedAdaptiveDBSCAN:
         self.logger.info("Incremental fitting completed.")
         return self
 
+    def get_density_analysis(self):
+        """
+        Get the density analysis results (only available when multi-scale density is enabled).
+        
+        Returns:
+        - analysis: DensityAnalysis object with comprehensive density information
+        
+        Raises:
+        - ValueError: If multi-scale density analysis is not enabled or not computed
+        """
+        if not self.enable_multi_scale_density:
+            raise ValueError("Multi-scale density analysis is not enabled. "
+                           "Set enable_multi_scale_density=True to use this feature.")
+        
+        if self.density_analysis_ is None:
+            raise ValueError("Density analysis not available. Call fit() first.")
+            
+        return self.density_analysis_
+    
+    def get_region_parameters(self):
+        """
+        Get the region-specific clustering parameters (only available when multi-scale density is enabled).
+        
+        Returns:
+        - parameters: Dictionary mapping region_id to clustering parameters
+        
+        Raises:
+        - ValueError: If multi-scale density analysis is not enabled or not computed
+        """
+        if not self.enable_multi_scale_density:
+            raise ValueError("Multi-scale density analysis is not enabled. "
+                           "Set enable_multi_scale_density=True to use this feature.")
+        
+        if self.region_parameters_ is None:
+            raise ValueError("Region parameters not available. Call fit() first.")
+            
+        return self.region_parameters_
+
     def plot_clusters(self, X, plot_all=False, title='Enhanced Adaptive DBSCAN Clustering'):
         """
         Plot the clustering results using Plotly for interactive visualization.
@@ -663,8 +942,7 @@ class EnhancedAdaptiveDBSCAN:
         - plot_all (bool): If True, plots all data points. Otherwise, plots a subset for clarity.
         - title (str): Plot title.
         """
-        if self.labels_ is None:
-            raise ValueError("Model has not been fitted yet.")
+        check_is_fitted(self, attributes=["labels_"])
 
         if not plot_all and X.shape[0] > 5000:
             # Plot a random subset of 5000 points for clarity
@@ -687,23 +965,19 @@ class EnhancedAdaptiveDBSCAN:
         # Define color palette
         unique_labels = df['Cluster'].unique()
         if '-1' in unique_labels:
-            # Remove '-1' from unique_labels using boolean indexing
             unique_labels = unique_labels[unique_labels != '-1']
-            # Alternatively, convert to list and use list comprehension
-            # unique_labels = [label for label in unique_labels if label != '-1']
-            
-            color_discrete_map = {label: px.colors.qualitative.Dark24[i % len(px.colors.qualitative.Dark24)] 
-                                for i, label in enumerate(sorted(unique_labels))}
+            color_discrete_map = {label: px.colors.qualitative.Dark24[i % len(px.colors.qualitative.Dark24)]
+                                  for i, label in enumerate(sorted(unique_labels))}
             color_discrete_map['-1'] = 'black'  # Noise
         else:
-            color_discrete_map = {label: px.colors.qualitative.Dark24[i % len(px.colors.qualitative.Dark24)] 
-                                for i, label in enumerate(sorted(unique_labels))}
+            color_discrete_map = {label: px.colors.qualitative.Dark24[i % len(px.colors.qualitative.Dark24)]
+                                  for i, label in enumerate(sorted(unique_labels))}
 
         fig = px.scatter(df, x='X', y='Y', color='Cluster',
-                        title=title,
-                        color_discrete_map=color_discrete_map,
-                        opacity=0.6,
-                        hover_data=['Cluster'])
+                         title=title,
+                         color_discrete_map=color_discrete_map,
+                         opacity=0.6,
+                         hover_data=['Cluster'])
 
         fig.update_layout(showlegend=True)
         fig.show()
@@ -721,6 +995,7 @@ class EnhancedAdaptiveDBSCAN:
         - Silhouette Score
         - Davies-Bouldin Index
         """
+        check_is_fitted(self, attributes=["labels_"])
         mask = labels != -1
         if len(set(labels[mask])) < 2:
             print("Not enough clusters to compute silhouette and Davies-Bouldin scores.")
@@ -729,3 +1004,116 @@ class EnhancedAdaptiveDBSCAN:
         davies_bouldin = davies_bouldin_score(X[mask], labels[mask])
         print(f"Silhouette Score: {silhouette:.4f}")
         print(f"Davies-Bouldin Index: {davies_bouldin:.4f}")
+
+    def fit_predict(self, X, y=None, additional_attributes=None):
+        """Fit to X and return cluster labels, per sklearn ClusterMixin."""
+        self.fit(X, y=y, additional_attributes=additional_attributes)
+        return self.labels_
+
+    def _more_tags(self):
+        # Indicate that y is not required
+        return {"requires_y": False}
+
+    def __sklearn_tags__(self):
+        """Public Tags API (scikit-learn >= 1.6).
+
+        - estimator_type: clusterer
+        - target y not required
+        - requires_fit: True (must be fitted before predict/plot)
+        """
+        # Avoid depending on super().__sklearn_tags__ (not available in older sklearn).
+        class _TargetTags:
+            def __init__(self):
+                self.required = False
+
+        class _Tags:
+            def __init__(self):
+                self.estimator_type = "clusterer"
+                self.target_tags = _TargetTags()
+                self.requires_fit = True  # Must be fitted before calling plot_clusters/evaluate_clustering
+
+        return _Tags()
+
+    def _convert_labels_to_cluster_regions(self, X, labels):
+        """Convert traditional cluster labels to ClusterRegion format for MDBSCAN processing."""
+        cluster_regions = []
+        unique_labels = np.unique(labels)
+        
+        for label in unique_labels:
+            if label == -1:  # Skip noise points
+                continue
+                
+            # Get points in this cluster
+            cluster_mask = labels == label
+            cluster_points = X[cluster_mask]
+            cluster_indices = np.where(cluster_mask)[0]
+            
+            if len(cluster_points) > 0:
+                # Calculate cluster properties
+                centroid = np.mean(cluster_points, axis=0)
+                
+                # Estimate density using KNN
+                if hasattr(self, 'density_engine') and self.density_engine is not None:
+                    # Use density engine for better density estimation
+                    densities = self.density_engine.compute_local_density(cluster_points)
+                    avg_density = np.mean(densities)
+                else:
+                    # Fallback density estimation
+                    if len(cluster_points) > 1:
+                        from sklearn.neighbors import NearestNeighbors
+                        nn = NearestNeighbors(n_neighbors=min(5, len(cluster_points)))
+                        nn.fit(cluster_points)
+                        distances, _ = nn.kneighbors(cluster_points)
+                        avg_density = 1.0 / (np.mean(distances[:, 1:]) + 1e-10)
+                    else:
+                        avg_density = 1.0
+                
+                # Create ClusterRegion with proper parameters
+                from .multi_density_clustering import ClusterRegion
+                
+                # Determine core and boundary points (simplified approach)
+                core_points = cluster_points  # For now, consider all as core points
+                boundary_points = np.array([])  # Empty for now
+                
+                region = ClusterRegion(
+                    cluster_id=int(label),
+                    region_id=0,  # Default region for standard clustering
+                    density_type="unknown",  # Default density type
+                    points=cluster_points,
+                    core_points=core_points,
+                    boundary_points=boundary_points,
+                    cluster_center=centroid,
+                    quality_score=avg_density,
+                    stability_score=1.0  # Default stability
+                )
+                cluster_regions.append(region)
+        
+        return cluster_regions
+
+    def get_mdbscan_clusters(self):
+        """Get MDBSCAN cluster results if available."""
+        if hasattr(self, 'mdbscan_clusters_') and self.mdbscan_clusters_ is not None:
+            return self.mdbscan_clusters_
+        else:
+            return None
+
+    def get_quality_analysis(self):
+        """Get cluster quality analysis results if available."""
+        if hasattr(self, 'quality_analysis_') and self.quality_analysis_ is not None:
+            return self.quality_analysis_
+        else:
+            return None
+
+    def get_boundary_analysis(self):
+        """Get boundary analysis results if available."""
+        if hasattr(self, 'boundary_analysis_') and self.boundary_analysis_ is not None:
+            return self.boundary_analysis_
+        else:
+            return None
+
+    def get_hierarchical_clusters(self):
+        """Get hierarchical clustering results if available."""
+        if hasattr(self, 'hierarchical_clusters_') and self.hierarchical_clusters_ is not None:
+            return self.hierarchical_clusters_
+        else:
+            return None
