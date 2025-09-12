@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Workflows &#8212; enhanced_adaptive_dbscan November 2024 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=d3eb9a3c"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="workflows">
+<h1>Workflows<a class="headerlink" href="#workflows" title="Link to this heading">¶</a></h1>
+<p>This page visualizes common flows using Mermaid to clarify the algorithm and maintenance workflows.</p>
+<section id="clustering-pipeline">
+<h2>Clustering pipeline<a class="headerlink" href="#clustering-pipeline" title="Link to this heading">¶</a></h2>
+<div class="highlight-mermaid notranslate"><div class="highlight"><pre><span></span>sequenceDiagram
+  autonumber
+  participant U as User
+  participant M as EnhancedAdaptiveDBSCAN
+  participant KD as KDTree
+  U-&gt;&gt;M: fit(X, additional_attributes)
+  M-&gt;&gt;M: _validate_data(X)
+  M-&gt;&gt;KD: build tree / kNN
+  KD--&gt;&gt;M: neighbor distances
+  M-&gt;&gt;M: compute local density
+  M-&gt;&gt;M: compute adaptive epsilon &amp; MinPts
+  M-&gt;&gt;M: identify core points &amp; expand clusters
+  M-&gt;&gt;M: build hierarchy &amp; compute stability
+  M-&gt;&gt;M: select stable clusters
+  M-&gt;&gt;U: labels_, cluster_centers_, cluster_stability_
+</pre></div>
+</div>
+</section>
+<section id="incremental-update">
+<h2>Incremental update<a class="headerlink" href="#incremental-update" title="Link to this heading">¶</a></h2>
+<div class="highlight-mermaid notranslate"><div class="highlight"><pre><span></span>flowchart LR
+  X0[Initial fit on X] --&gt; U1[New data X_new]
+  U1 --&gt; F1[fit_incremental]
+  F1 --&gt; C1[Assign to nearest clusters]
+  C1 --&gt; P1[Partial reclustering for affected regions]
+  P1 --&gt; O1[Update labels_ and centers]
+</pre></div>
+</div>
+</section>
+<section id="release-workflow-local">
+<h2>Release workflow (local)<a class="headerlink" href="#release-workflow-local" title="Link to this heading">¶</a></h2>
+<div class="highlight-mermaid notranslate"><div class="highlight"><pre><span></span>flowchart LR
+  A[Choose bump patch/minor/major/pre] --&gt; B[VS Code task: release: full]
+  B --&gt; C[bump_version.py updates pyproject]
+  C --&gt; D[Clean + build sdist/wheel]
+  D --&gt; E[twine upload TestPyPI/PyPI]
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">enhanced_adaptive_dbscan</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced_features.html">Advanced Features</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/core.html">Core API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/algorithms.html">Algorithm Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/optimization.html">Optimization Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/production.html">Production Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Michael Kennedy.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/workflows.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

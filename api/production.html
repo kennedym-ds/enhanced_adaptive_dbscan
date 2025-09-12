@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Production Reference &#8212; enhanced_adaptive_dbscan November 2024 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=d3eb9a3c"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contributing" href="../contributing.html" />
+    <link rel="prev" title="Optimization Reference" href="optimization.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="production-reference">
+<h1>Production Reference<a class="headerlink" href="#production-reference" title="Link to this heading">¶</a></h1>
+<p>Complete guide for deploying and managing Enhanced Adaptive DBSCAN in production environments.</p>
+<section id="production-architecture">
+<h2>Production Architecture<a class="headerlink" href="#production-architecture" title="Link to this heading">¶</a></h2>
+<section id="system-overview">
+<h3>System Overview<a class="headerlink" href="#system-overview" title="Link to this heading">¶</a></h3>
+<p>The production system consists of several key components working together to provide robust clustering services:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Data Ingestion │────│  Preprocessing  │────│    Clustering   │
+│                 │    │                 │    │     Engine      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       │                       │
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Monitoring    │    │   Model Store   │    │  Result Store   │
+│   &amp; Alerting    │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+</pre></div>
+</div>
+</section>
+<section id="production-pipeline">
+<h3>Production Pipeline<a class="headerlink" href="#production-pipeline" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">ProductionPipeline</span></code> class orchestrates the entire production workflow:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ProductionPipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Production-ready clustering pipeline&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_config</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_store</span> <span class="o">=</span> <span class="n">ModelStore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;model_store&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span> <span class="o">=</span> <span class="n">MonitoringSystem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;monitoring&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="n">ProductionPreprocessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;preprocessing&#39;</span><span class="p">])</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">deploy_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deploy a clustering model to production&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Validate model</span>
+            <span class="n">validation_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">validation_result</span><span class="p">[</span><span class="s1">&#39;valid&#39;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model validation failed: </span><span class="si">{</span><span class="n">validation_result</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Create deployment package</span>
+            <span class="n">deployment_package</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_deployment_package</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">validation_result</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Deploy to model store</span>
+            <span class="n">deployment_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_store</span><span class="o">.</span><span class="n">deploy</span><span class="p">(</span><span class="n">deployment_package</span><span class="p">)</span>
+            
+            <span class="c1"># Update routing configuration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_routing</span><span class="p">(</span><span class="n">deployment_id</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+            
+            <span class="c1"># Start monitoring</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">start_model_monitoring</span><span class="p">(</span><span class="n">deployment_id</span><span class="p">)</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> deployed successfully with ID: </span><span class="si">{</span><span class="n">deployment_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">deployment_id</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deployment failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rollback_deployment</span><span class="p">(</span><span class="n">deployment_id</span> <span class="k">if</span> <span class="s1">&#39;deployment_id&#39;</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">model_version</span><span class="o">=</span><span class="s1">&#39;latest&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a batch of data through the pipeline&quot;&quot;&quot;</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Load model</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_store</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">model_version</span><span class="p">)</span>
+            
+            <span class="c1"># Preprocess data</span>
+            <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            
+            <span class="c1"># Perform clustering</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">processed_data</span><span class="p">)</span>
+            
+            <span class="c1"># Post-process results</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_process_results</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">processed_data</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            
+            <span class="c1"># Record metrics</span>
+            <span class="n">processing_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">record_batch_metrics</span><span class="p">({</span>
+                <span class="s1">&#39;processing_time&#39;</span><span class="p">:</span> <span class="n">processing_time</span><span class="p">,</span>
+                <span class="s1">&#39;data_size&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                <span class="s1">&#39;n_clusters&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">)),</span>
+                <span class="s1">&#39;noise_ratio&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">})</span>
+            
+            <span class="k">return</span> <span class="n">results</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span><span class="o">.</span><span class="n">record_error</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="p">{</span>
+                <span class="s1">&#39;operation&#39;</span><span class="p">:</span> <span class="s1">&#39;batch_processing&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;model_version&#39;</span><span class="p">:</span> <span class="n">model_version</span><span class="p">,</span>
+                <span class="s1">&#39;data_size&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="p">})</span>
+            <span class="k">raise</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="model-management">
+<h2>Model Management<a class="headerlink" href="#model-management" title="Link to this heading">¶</a></h2>
+<section id="model-versioning">
+<h3>Model Versioning<a class="headerlink" href="#model-versioning" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ModelStore</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Centralized model storage and versioning&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage_backend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_storage_backend</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_metadata_db</span><span class="p">()</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save a model with version control&quot;&quot;&quot;</span>
+        <span class="n">model_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;enhanced_dbscan_</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="c1"># Serialize model</span>
+        <span class="n">model_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">(),</span>
+            <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="n">metadata</span> <span class="ow">or</span> <span class="p">{},</span>
+            <span class="s1">&#39;framework_version&#39;</span><span class="p">:</span> <span class="n">enhanced_adaptive_dbscan</span><span class="o">.</span><span class="n">__version__</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Save to storage</span>
+        <span class="n">storage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage_backend</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">model_data</span><span class="p">)</span>
+        
+        <span class="c1"># Update metadata database</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_db</span><span class="o">.</span><span class="n">insert_model_record</span><span class="p">({</span>
+            <span class="s1">&#39;model_id&#39;</span><span class="p">:</span> <span class="n">model_id</span><span class="p">,</span>
+            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+            <span class="s1">&#39;storage_path&#39;</span><span class="p">:</span> <span class="n">storage_path</span><span class="p">,</span>
+            <span class="s1">&#39;created_at&#39;</span><span class="p">:</span> <span class="n">model_data</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span>
+        <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">model_id</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;latest&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a model by version&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;latest&#39;</span><span class="p">:</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_latest_version</span><span class="p">()</span>
+        
+        <span class="n">model_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;enhanced_dbscan_</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="c1"># Load from storage</span>
+        <span class="n">model_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage_backend</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">model_data</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List available models&quot;&quot;&quot;</span>
+        <span class="n">filters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+            <span class="n">filters</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_db</span><span class="o">.</span><span class="n">query_models</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">retire_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retire an old model version&quot;&quot;&quot;</span>
+        <span class="n">model_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;enhanced_dbscan_</span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_db</span><span class="o">.</span><span class="n">update_model_status</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="s1">&#39;retired&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Optionally archive storage</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;archive_retired_models&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">storage_backend</span><span class="o">.</span><span class="n">archive</span><span class="p">(</span><span class="n">model_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="model-validation">
+<h3>Model Validation<a class="headerlink" href="#model-validation" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ModelValidator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Comprehensive model validation for production deployment&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_tests</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_basic_functionality</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_parameter_validation</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_edge_cases</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_performance</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_memory_usage</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_test_reproducibility</span>
+        <span class="p">]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">test_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run comprehensive model validation&quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;valid&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;errors&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;warnings&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;test_results&#39;</span><span class="p">:</span> <span class="p">{}</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">test_func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validation_tests</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">test_result</span> <span class="o">=</span> <span class="n">test_func</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">test_data</span><span class="p">)</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;test_results&#39;</span><span class="p">][</span><span class="n">test_func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">test_result</span>
+                
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">test_result</span><span class="p">[</span><span class="s1">&#39;passed&#39;</span><span class="p">]:</span>
+                    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;valid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">results</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">test_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;errors&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+                
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;warnings&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">test_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;warnings&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+                
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;valid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">results</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation test </span><span class="si">{</span><span class="n">test_func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">results</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_test_basic_functionality</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">test_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test basic clustering functionality&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Generate test data if not provided</span>
+            <span class="k">if</span> <span class="n">test_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">test_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            
+            <span class="c1"># Test fit_predict</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
+            
+            <span class="c1"># Validate results</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_data</span><span class="p">),</span> <span class="s2">&quot;Label count mismatch&quot;</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">labels</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;Invalid label values&quot;</span>
+            
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;passed&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;n_clusters&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">labels</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
+                    <span class="s1">&#39;noise_ratio&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s1">&#39;passed&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;errors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Basic functionality test failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_test_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">test_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model performance requirements&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">test_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">test_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        
+        <span class="c1"># Measure performance</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
+        <span class="n">execution_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        
+        <span class="c1"># Performance thresholds</span>
+        <span class="n">max_time_per_sample</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># 10ms per sample</span>
+        <span class="n">max_total_time</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span> <span class="o">*</span> <span class="n">max_time_per_sample</span>
+        
+        <span class="n">passed</span> <span class="o">=</span> <span class="n">execution_time</span> <span class="o">&lt;=</span> <span class="n">max_total_time</span>
+        
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;passed&#39;</span><span class="p">:</span> <span class="n">passed</span><span class="p">,</span>
+            <span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;execution_time&#39;</span><span class="p">:</span> <span class="n">execution_time</span><span class="p">,</span>
+                <span class="s1">&#39;time_per_sample&#39;</span><span class="p">:</span> <span class="n">execution_time</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_data</span><span class="p">),</span>
+                <span class="s1">&#39;threshold&#39;</span><span class="p">:</span> <span class="n">max_total_time</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">passed</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Performance requirement not met: </span><span class="si">{</span><span class="n">execution_time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">s &gt; </span><span class="si">{</span><span class="n">max_total_time</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="deployment-strategies">
+<h2>Deployment Strategies<a class="headerlink" href="#deployment-strategies" title="Link to this heading">¶</a></h2>
+<section id="blue-green-deployment">
+<h3>Blue-Green Deployment<a class="headerlink" href="#blue-green-deployment" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BlueGreenDeployment</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Blue-green deployment strategy for zero-downtime updates&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load_balancer</span><span class="p">,</span> <span class="n">model_store</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_balancer</span> <span class="o">=</span> <span class="n">load_balancer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_store</span> <span class="o">=</span> <span class="n">model_store</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_environment</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">deploy_new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deploy new model version using blue-green strategy&quot;&quot;&quot;</span>
+        <span class="c1"># Determine target environment</span>
+        <span class="n">target_env</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_environment</span> <span class="o">==</span> <span class="s1">&#39;blue&#39;</span> <span class="k">else</span> <span class="s1">&#39;blue&#39;</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Deploy to inactive environment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deploy_to_environment</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">target_env</span><span class="p">)</span>
+            
+            <span class="c1"># Validate deployment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_deployment</span><span class="p">(</span><span class="n">target_env</span><span class="p">)</span>
+            
+            <span class="c1"># Switch traffic gradually</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gradual_traffic_switch</span><span class="p">(</span><span class="n">target_env</span><span class="p">)</span>
+            
+            <span class="c1"># Update current environment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_environment</span> <span class="o">=</span> <span class="n">target_env</span>
+            
+            <span class="c1"># Clean up old environment</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup_old_environment</span><span class="p">()</span>
+            
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Blue-green deployment completed. Active environment: </span><span class="si">{</span><span class="n">target_env</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Blue-green deployment failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rollback_deployment</span><span class="p">()</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gradual_traffic_switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_env</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gradually switch traffic to new environment&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">traffic_percentage</span> <span class="o">=</span> <span class="p">(</span><span class="n">step</span> <span class="o">/</span> <span class="n">steps</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_balancer</span><span class="o">.</span><span class="n">set_traffic_split</span><span class="p">({</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_environment</span><span class="p">:</span> <span class="mi">100</span> <span class="o">-</span> <span class="n">traffic_percentage</span><span class="p">,</span>
+                <span class="n">target_env</span><span class="p">:</span> <span class="n">traffic_percentage</span>
+            <span class="p">})</span>
+            
+            <span class="c1"># Monitor for issues</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>  <span class="c1"># Wait 1 minute between steps</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_health_metrics</span><span class="p">(</span><span class="n">target_env</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Health check failed at </span><span class="si">{</span><span class="n">traffic_percentage</span><span class="si">}</span><span class="s2">% traffic&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="canary-deployment">
+<h3>Canary Deployment<a class="headerlink" href="#canary-deployment" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">CanaryDeployment</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Canary deployment for gradual rollout with monitoring&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">monitoring_system</span><span class="p">,</span> <span class="n">rollback_threshold</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitoring</span> <span class="o">=</span> <span class="n">monitoring_system</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rollback_threshold</span> <span class="o">=</span> <span class="n">rollback_threshold</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">deploy_canary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">canary_percentage</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deploy model to a small percentage of traffic&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Deploy canary version</span>
+            <span class="n">canary_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deploy_canary_instance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+            
+            <span class="c1"># Route small percentage of traffic</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_route_canary_traffic</span><span class="p">(</span><span class="n">canary_id</span><span class="p">,</span> <span class="n">canary_percentage</span><span class="p">)</span>
+            
+            <span class="c1"># Monitor canary performance</span>
+            <span class="n">canary_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_monitor_canary</span><span class="p">(</span><span class="n">canary_id</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>  <span class="c1"># 1 hour</span>
+            
+            <span class="c1"># Decide on full rollout</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_promote_canary</span><span class="p">(</span><span class="n">canary_metrics</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_promote_canary</span><span class="p">(</span><span class="n">canary_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_rollback_canary</span><span class="p">(</span><span class="n">canary_id</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+                
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Canary deployment failed: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rollback_canary</span><span class="p">(</span><span class="n">canary_id</span> <span class="k">if</span> <span class="s1">&#39;canary_id&#39;</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">raise</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_should_promote_canary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine if canary should be promoted to full deployment&quot;&quot;&quot;</span>
+        <span class="c1"># Compare error rates</span>
+        <span class="n">baseline_error_rate</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;baseline&#39;</span><span class="p">][</span><span class="s1">&#39;error_rate&#39;</span><span class="p">]</span>
+        <span class="n">canary_error_rate</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;canary&#39;</span><span class="p">][</span><span class="s1">&#39;error_rate&#39;</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">canary_error_rate</span> <span class="o">&gt;</span> <span class="n">baseline_error_rate</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rollback_threshold</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="c1"># Compare performance metrics</span>
+        <span class="n">baseline_latency</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;baseline&#39;</span><span class="p">][</span><span class="s1">&#39;avg_latency&#39;</span><span class="p">]</span>
+        <span class="n">canary_latency</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;canary&#39;</span><span class="p">][</span><span class="s1">&#39;avg_latency&#39;</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">canary_latency</span> <span class="o">&gt;</span> <span class="n">baseline_latency</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">:</span>  <span class="c1"># 20% latency increase threshold</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="c1"># Compare clustering quality (if available)</span>
+        <span class="k">if</span> <span class="s1">&#39;quality_metrics&#39;</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">baseline_quality</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;baseline&#39;</span><span class="p">][</span><span class="s1">&#39;quality_metrics&#39;</span><span class="p">][</span><span class="s1">&#39;silhouette&#39;</span><span class="p">]</span>
+            <span class="n">canary_quality</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;canary&#39;</span><span class="p">][</span><span class="s1">&#39;quality_metrics&#39;</span><span class="p">][</span><span class="s1">&#39;silhouette&#39;</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">canary_quality</span> <span class="o">&lt;</span> <span class="n">baseline_quality</span> <span class="o">*</span> <span class="mf">0.95</span><span class="p">:</span>  <span class="c1"># 5% quality decrease threshold</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">return</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="monitoring-and-observability">
+<h2>Monitoring and Observability<a class="headerlink" href="#monitoring-and-observability" title="Link to this heading">¶</a></h2>
+<section id="comprehensive-monitoring">
+<h3>Comprehensive Monitoring<a class="headerlink" href="#comprehensive-monitoring" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ProductionMonitoring</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Comprehensive monitoring system for production clustering&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_collector</span> <span class="o">=</span> <span class="n">MetricsCollector</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alerting_system</span> <span class="o">=</span> <span class="n">AlertingSystem</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;alerting&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_aggregator</span> <span class="o">=</span> <span class="n">LogAggregator</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;logging&#39;</span><span class="p">])</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_monitoring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start comprehensive monitoring&quot;&quot;&quot;</span>
+        <span class="c1"># System metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_system_monitoring</span><span class="p">()</span>
+        
+        <span class="c1"># Application metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_application_monitoring</span><span class="p">()</span>
+        
+        <span class="c1"># Model performance metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_model_monitoring</span><span class="p">()</span>
+        
+        <span class="c1"># Data quality monitoring</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_data_quality_monitoring</span><span class="p">()</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_start_model_monitoring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Monitor model-specific metrics&quot;&quot;&quot;</span>
+        <span class="n">model_metrics</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;clustering_latency&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;clustering_throughput&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cluster_count_distribution&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;noise_ratio_trend&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;silhouette_score_trend&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;model_drift_indicators&#39;</span>
+        <span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">model_metrics</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics_collector</span><span class="o">.</span><span class="n">register_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_model_metric</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">detect_model_drift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_data</span><span class="p">,</span> <span class="n">reference_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect concept drift in clustering model&quot;&quot;&quot;</span>
+        <span class="c1"># Statistical tests</span>
+        <span class="n">drift_tests</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;ks_test&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kolmogorov_smirnov_test</span><span class="p">(</span><span class="n">current_data</span><span class="p">,</span> <span class="n">reference_data</span><span class="p">),</span>
+            <span class="s1">&#39;psi_test&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_population_stability_index</span><span class="p">(</span><span class="n">current_data</span><span class="p">,</span> <span class="n">reference_data</span><span class="p">),</span>
+            <span class="s1">&#39;clustering_stability&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clustering_stability_test</span><span class="p">(</span><span class="n">current_data</span><span class="p">,</span> <span class="n">reference_data</span><span class="p">)</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Combine test results</span>
+        <span class="n">drift_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_drift_scores</span><span class="p">(</span><span class="n">drift_tests</span><span class="p">)</span>
+        
+        <span class="c1"># Alert if drift detected</span>
+        <span class="k">if</span> <span class="n">drift_score</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;drift_threshold&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alerting_system</span><span class="o">.</span><span class="n">send_alert</span><span class="p">({</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;model_drift&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;severity&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span> <span class="k">if</span> <span class="n">drift_score</span> <span class="o">&gt;</span> <span class="mf">0.8</span> <span class="k">else</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;drift_score&#39;</span><span class="p">:</span> <span class="n">drift_score</span><span class="p">,</span>
+                <span class="s1">&#39;test_results&#39;</span><span class="p">:</span> <span class="n">drift_tests</span><span class="p">,</span>
+                <span class="s1">&#39;recommendation&#39;</span><span class="p">:</span> <span class="s1">&#39;Consider retraining model with recent data&#39;</span>
+            <span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">drift_score</span><span class="p">,</span> <span class="n">drift_tests</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_population_stability_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate Population Stability Index (PSI)&quot;&quot;&quot;</span>
+        <span class="c1"># Create bins based on reference data</span>
+        <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        
+        <span class="c1"># Calculate distributions</span>
+        <span class="n">ref_dist</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bin_edges</span><span class="p">)</span>
+        <span class="n">cur_dist</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bin_edges</span><span class="p">)</span>
+        
+        <span class="c1"># Normalize to probabilities</span>
+        <span class="n">ref_dist</span> <span class="o">=</span> <span class="n">ref_dist</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ref_dist</span><span class="p">)</span>
+        <span class="n">cur_dist</span> <span class="o">=</span> <span class="n">cur_dist</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cur_dist</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate PSI</span>
+        <span class="n">psi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">cur_dist</span> <span class="o">-</span> <span class="n">ref_dist</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">cur_dist</span> <span class="o">/</span> <span class="p">(</span><span class="n">ref_dist</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">)))</span>
+        
+        <span class="k">return</span> <span class="n">psi</span>
+</pre></div>
+</div>
+</section>
+<section id="alerting-system">
+<h3>Alerting System<a class="headerlink" href="#alerting-system" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">AlertingSystem</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Intelligent alerting for production issues&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alert_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_alert_channels</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alert_history</span> <span class="o">=</span> <span class="n">AlertHistory</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">escalation_manager</span> <span class="o">=</span> <span class="n">EscalationManager</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;escalation&#39;</span><span class="p">])</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">send_alert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alert_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send alert with intelligent routing and escalation&quot;&quot;&quot;</span>
+        <span class="n">alert</span> <span class="o">=</span> <span class="n">Alert</span><span class="p">(</span>
+            <span class="n">alert_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_generate_alert_id</span><span class="p">(),</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">(),</span>
+            <span class="n">severity</span><span class="o">=</span><span class="n">alert_data</span><span class="p">[</span><span class="s1">&#39;severity&#39;</span><span class="p">],</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">alert_data</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+            <span class="n">message</span><span class="o">=</span><span class="n">alert_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">alert_data</span>
+        <span class="p">)</span>
+        
+        <span class="c1"># Check for alert suppression</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_suppress_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Alert suppressed: </span><span class="si">{</span><span class="n">alert</span><span class="o">.</span><span class="n">alert_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># Route alert to appropriate channels</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_alert_channels</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">channel</span><span class="o">.</span><span class="n">send_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to send alert via </span><span class="si">{</span><span class="n">channel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Store alert history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alert_history</span><span class="o">.</span><span class="n">record_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+        
+        <span class="c1"># Start escalation if needed</span>
+        <span class="k">if</span> <span class="n">alert</span><span class="o">.</span><span class="n">severity</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;critical&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">escalation_manager</span><span class="o">.</span><span class="n">start_escalation</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_determine_alert_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alert</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine which channels should receive the alert&quot;&quot;&quot;</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Route based on alert type and severity</span>
+        <span class="n">routing_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;routing_rules&#39;</span><span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">routing_rules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matches_routing_rule</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">rule</span><span class="p">):</span>
+                <span class="n">channels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">rule</span><span class="p">[</span><span class="s1">&#39;channels&#39;</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">channels</span><span class="p">))</span>  <span class="c1"># Remove duplicates</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="scaling-and-performance">
+<h2>Scaling and Performance<a class="headerlink" href="#scaling-and-performance" title="Link to this heading">¶</a></h2>
+<section id="horizontal-scaling">
+<h3>Horizontal Scaling<a class="headerlink" href="#horizontal-scaling" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HorizontalScaler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatic horizontal scaling for clustering workloads&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orchestrator</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orchestrator</span> <span class="o">=</span> <span class="n">orchestrator</span>  <span class="c1"># K8s, Docker Swarm, etc.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_metrics</span> <span class="o">=</span> <span class="n">ScalingMetrics</span><span class="p">()</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">auto_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatically scale based on workload metrics&quot;&quot;&quot;</span>
+        <span class="n">current_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_metrics</span><span class="o">.</span><span class="n">get_current_metrics</span><span class="p">()</span>
+        
+        <span class="c1"># Calculate desired replica count</span>
+        <span class="n">desired_replicas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_desired_replicas</span><span class="p">(</span><span class="n">current_metrics</span><span class="p">)</span>
+        <span class="n">current_replicas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orchestrator</span><span class="o">.</span><span class="n">get_current_replicas</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">desired_replicas</span> <span class="o">!=</span> <span class="n">current_replicas</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_perform_scaling</span><span class="p">(</span><span class="n">current_replicas</span><span class="p">,</span> <span class="n">desired_replicas</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calculate_desired_replicas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate desired number of replicas based on metrics&quot;&quot;&quot;</span>
+        <span class="c1"># CPU-based scaling</span>
+        <span class="n">cpu_utilization</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;cpu_utilization&#39;</span><span class="p">]</span>
+        <span class="n">cpu_target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;cpu_target&#39;</span><span class="p">]</span>
+        <span class="n">cpu_replicas</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">current_replicas</span> <span class="o">*</span> <span class="n">cpu_utilization</span> <span class="o">/</span> <span class="n">cpu_target</span><span class="p">)</span>
+        
+        <span class="c1"># Queue-based scaling</span>
+        <span class="n">queue_length</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;queue_length&#39;</span><span class="p">]</span>
+        <span class="n">queue_target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;queue_target&#39;</span><span class="p">]</span>
+        <span class="n">queue_replicas</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">queue_length</span> <span class="o">/</span> <span class="n">queue_target</span><span class="p">)</span>
+        
+        <span class="c1"># Memory-based scaling</span>
+        <span class="n">memory_utilization</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="s1">&#39;memory_utilization&#39;</span><span class="p">]</span>
+        <span class="n">memory_target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;memory_target&#39;</span><span class="p">]</span>
+        <span class="n">memory_replicas</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">current_replicas</span> <span class="o">*</span> <span class="n">memory_utilization</span> <span class="o">/</span> <span class="n">memory_target</span><span class="p">)</span>
+        
+        <span class="c1"># Take maximum of all scaling signals</span>
+        <span class="n">desired</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cpu_replicas</span><span class="p">,</span> <span class="n">queue_replicas</span><span class="p">,</span> <span class="n">memory_replicas</span><span class="p">)</span>
+        
+        <span class="c1"># Apply min/max constraints</span>
+        <span class="n">min_replicas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;min_replicas&#39;</span><span class="p">]</span>
+        <span class="n">max_replicas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;max_replicas&#39;</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_replicas</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_replicas</span><span class="p">,</span> <span class="n">desired</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="performance-optimization">
+<h3>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PerformanceOptimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Runtime performance optimization for production clustering&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimization_strategies</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_memory_usage</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_cpu_usage</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_io_operations</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimize_algorithm_parameters</span>
+        <span class="p">]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize_runtime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">workload_characteristics</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Optimize pipeline for current workload&quot;&quot;&quot;</span>
+        <span class="n">optimizations</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">strategy</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimization_strategies</span><span class="p">:</span>
+            <span class="n">optimization</span> <span class="o">=</span> <span class="n">strategy</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">workload_characteristics</span><span class="p">)</span>
+            <span class="n">optimizations</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">optimization</span><span class="p">)</span>
+        
+        <span class="c1"># Apply optimizations</span>
+        <span class="n">optimized_pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_optimizations</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">optimizations</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">optimized_pipeline</span><span class="p">,</span> <span class="n">optimizations</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_optimize_memory_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">workload</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Optimize memory usage patterns&quot;&quot;&quot;</span>
+        <span class="n">optimizations</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># Batch size optimization</span>
+        <span class="k">if</span> <span class="n">workload</span><span class="p">[</span><span class="s1">&#39;data_size&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">100000</span><span class="p">:</span>
+            <span class="n">optimizations</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="n">workload</span><span class="p">[</span><span class="s1">&#39;data_size&#39;</span><span class="p">]</span> <span class="o">//</span> <span class="mi">10</span><span class="p">)</span>
+        
+        <span class="c1"># Memory mapping for large datasets</span>
+        <span class="k">if</span> <span class="n">workload</span><span class="p">[</span><span class="s1">&#39;data_size&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1000000</span><span class="p">:</span>
+            <span class="n">optimizations</span><span class="p">[</span><span class="s1">&#39;use_memory_mapping&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="c1"># Garbage collection tuning</span>
+        <span class="n">optimizations</span><span class="p">[</span><span class="s1">&#39;gc_threshold&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_gc_threshold</span><span class="p">(</span><span class="n">workload</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">optimizations</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_optimize_algorithm_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">workload</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Optimize algorithm parameters for performance&quot;&quot;&quot;</span>
+        <span class="n">optimizations</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># Neighbor search algorithm</span>
+        <span class="k">if</span> <span class="n">workload</span><span class="p">[</span><span class="s1">&#39;dimensionality&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="n">optimizations</span><span class="p">[</span><span class="s1">&#39;neighbor_algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ball_tree&#39;</span>
+        <span class="k">elif</span> <span class="n">workload</span><span class="p">[</span><span class="s1">&#39;data_size&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">optimizations</span><span class="p">[</span><span class="s1">&#39;neighbor_algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;brute&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">optimizations</span><span class="p">[</span><span class="s1">&#39;neighbor_algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;kd_tree&#39;</span>
+        
+        <span class="c1"># Parallel processing</span>
+        <span class="n">cpu_count</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">workload</span><span class="p">[</span><span class="s1">&#39;data_size&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">10000</span><span class="p">:</span>
+            <span class="n">optimizations</span><span class="p">[</span><span class="s1">&#39;n_jobs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">cpu_count</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">optimizations</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="security-considerations">
+<h2>Security Considerations<a class="headerlink" href="#security-considerations" title="Link to this heading">¶</a></h2>
+<section id="data-protection">
+<h3>Data Protection<a class="headerlink" href="#data-protection" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DataProtectionManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Comprehensive data protection for clustering pipelines&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encryption_manager</span> <span class="o">=</span> <span class="n">EncryptionManager</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;encryption&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">access_control</span> <span class="o">=</span> <span class="n">AccessControlManager</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;access_control&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">audit_logger</span> <span class="o">=</span> <span class="n">AuditLogger</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;auditing&#39;</span><span class="p">])</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">secure_data_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">user_context</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process data with security controls&quot;&quot;&quot;</span>
+        <span class="c1"># Audit data access</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">audit_logger</span><span class="o">.</span><span class="n">log_data_access</span><span class="p">(</span><span class="n">user_context</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s1">&#39;data_size&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">(),</span>
+            <span class="s1">&#39;operation&#39;</span><span class="p">:</span> <span class="s1">&#39;clustering&#39;</span>
+        <span class="p">})</span>
+        
+        <span class="c1"># Check access permissions</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_control</span><span class="o">.</span><span class="n">check_permissions</span><span class="p">(</span><span class="n">user_context</span><span class="p">,</span> <span class="s1">&#39;cluster_data&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">PermissionError</span><span class="p">(</span><span class="s2">&quot;Insufficient permissions for clustering operation&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Encrypt sensitive data in memory</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;encrypt_in_memory&#39;</span><span class="p">]:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encryption_manager</span><span class="o">.</span><span class="n">encrypt_in_memory</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        
+        <span class="c1"># Apply data masking if required</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;apply_data_masking&#39;</span><span class="p">]:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_data_masking</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">user_context</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">data</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_data_masking</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">user_context</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply data masking based on user permissions&quot;&quot;&quot;</span>
+        <span class="n">masking_rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;masking_rules&#39;</span><span class="p">]</span>
+        <span class="n">user_permissions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_control</span><span class="o">.</span><span class="n">get_user_permissions</span><span class="p">(</span><span class="n">user_context</span><span class="p">)</span>
+        
+        <span class="n">masked_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">masking_rules</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rule</span><span class="p">[</span><span class="s1">&#39;applies_to_permission&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">user_permissions</span><span class="p">:</span>
+                <span class="c1"># Apply masking to specified columns</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">rule</span><span class="p">[</span><span class="s1">&#39;columns&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">col</span> <span class="o">&lt;</span> <span class="n">masked_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">masked_data</span><span class="p">[:,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_column</span><span class="p">(</span>
+                            <span class="n">masked_data</span><span class="p">[:,</span> <span class="n">col</span><span class="p">],</span> 
+                            <span class="n">rule</span><span class="p">[</span><span class="s1">&#39;masking_type&#39;</span><span class="p">]</span>
+                        <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">masked_data</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="configuration-management">
+<h2>Configuration Management<a class="headerlink" href="#configuration-management" title="Link to this heading">¶</a></h2>
+<section id="environment-specific-configuration">
+<h3>Environment-Specific Configuration<a class="headerlink" href="#environment-specific-configuration" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># production_config.yaml</span>
+<span class="n">production</span><span class="p">:</span>
+  <span class="n">database</span><span class="p">:</span>
+    <span class="n">host</span><span class="p">:</span> <span class="s2">&quot;$</span><span class="si">{DB_HOST}</span><span class="s2">&quot;</span>
+    <span class="n">port</span><span class="p">:</span> <span class="mi">5432</span>
+    <span class="n">database</span><span class="p">:</span> <span class="s2">&quot;$</span><span class="si">{DB_NAME}</span><span class="s2">&quot;</span>
+    <span class="n">ssl_mode</span><span class="p">:</span> <span class="s2">&quot;require&quot;</span>
+    
+  <span class="n">clustering</span><span class="p">:</span>
+    <span class="n">default_parameters</span><span class="p">:</span>
+      <span class="n">eps</span><span class="p">:</span> <span class="mf">0.5</span>
+      <span class="n">min_samples</span><span class="p">:</span> <span class="mi">5</span>
+      <span class="n">n_jobs</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span>
+      
+  <span class="n">monitoring</span><span class="p">:</span>
+    <span class="n">metrics_retention_days</span><span class="p">:</span> <span class="mi">90</span>
+    <span class="n">alert_thresholds</span><span class="p">:</span>
+      <span class="n">error_rate</span><span class="p">:</span> <span class="mf">0.01</span>
+      <span class="n">latency_p99</span><span class="p">:</span> <span class="mf">2.0</span>
+      <span class="n">memory_usage</span><span class="p">:</span> <span class="mf">0.8</span>
+      
+  <span class="n">scaling</span><span class="p">:</span>
+    <span class="n">min_replicas</span><span class="p">:</span> <span class="mi">2</span>
+    <span class="n">max_replicas</span><span class="p">:</span> <span class="mi">20</span>
+    <span class="n">cpu_target</span><span class="p">:</span> <span class="mf">0.7</span>
+    <span class="n">memory_target</span><span class="p">:</span> <span class="mf">0.8</span>
+    
+  <span class="n">security</span><span class="p">:</span>
+    <span class="n">encrypt_in_memory</span><span class="p">:</span> <span class="n">true</span>
+    <span class="n">apply_data_masking</span><span class="p">:</span> <span class="n">true</span>
+    <span class="n">audit_all_operations</span><span class="p">:</span> <span class="n">true</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="disaster-recovery">
+<h2>Disaster Recovery<a class="headerlink" href="#disaster-recovery" title="Link to this heading">¶</a></h2>
+<section id="backup-and-recovery">
+<h3>Backup and Recovery<a class="headerlink" href="#backup-and-recovery" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DisasterRecoveryManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Comprehensive disaster recovery for production systems&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup_manager</span> <span class="o">=</span> <span class="n">BackupManager</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;backup&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recovery_orchestrator</span> <span class="o">=</span> <span class="n">RecoveryOrchestrator</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;recovery&#39;</span><span class="p">])</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backup_type</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create system backup&quot;&quot;&quot;</span>
+        <span class="n">backup_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;backup_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">_%H%M%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+        <span class="n">backup_components</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;models&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backup_models</span><span class="p">(),</span>
+            <span class="s1">&#39;configuration&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backup_configuration</span><span class="p">(),</span>
+            <span class="s1">&#39;monitoring_data&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backup_monitoring_data</span><span class="p">(),</span>
+            <span class="s1">&#39;user_data&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backup_user_data</span><span class="p">()</span> <span class="k">if</span> <span class="n">backup_type</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">}</span>
+        
+        <span class="n">backup_manifest</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;backup_id&#39;</span><span class="p">:</span> <span class="n">backup_id</span><span class="p">,</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">(),</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">backup_type</span><span class="p">,</span>
+            <span class="s1">&#39;components&#39;</span><span class="p">:</span> <span class="n">backup_components</span><span class="p">,</span>
+            <span class="s1">&#39;framework_version&#39;</span><span class="p">:</span> <span class="n">enhanced_adaptive_dbscan</span><span class="o">.</span><span class="n">__version__</span>
+        <span class="p">}</span>
+        
+        <span class="c1"># Store backup</span>
+        <span class="n">backup_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup_manager</span><span class="o">.</span><span class="n">store_backup</span><span class="p">(</span><span class="n">backup_manifest</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Backup </span><span class="si">{</span><span class="n">backup_id</span><span class="si">}</span><span class="s2"> created successfully at </span><span class="si">{</span><span class="n">backup_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">backup_id</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">restore_from_backup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">,</span> <span class="n">restore_components</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore system from backup&quot;&quot;&quot;</span>
+        <span class="c1"># Load backup manifest</span>
+        <span class="n">backup_manifest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backup_manager</span><span class="o">.</span><span class="n">load_backup_manifest</span><span class="p">(</span><span class="n">backup_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">restore_components</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">restore_components</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">backup_manifest</span><span class="p">[</span><span class="s1">&#39;components&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        
+        <span class="c1"># Execute recovery plan</span>
+        <span class="n">recovery_plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recovery_orchestrator</span><span class="o">.</span><span class="n">create_recovery_plan</span><span class="p">(</span>
+            <span class="n">backup_manifest</span><span class="p">,</span> <span class="n">restore_components</span>
+        <span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">recovery_orchestrator</span><span class="o">.</span><span class="n">execute_recovery_plan</span><span class="p">(</span><span class="n">recovery_plan</span><span class="p">)</span>
+        
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;System restored from backup </span><span class="si">{</span><span class="n">backup_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Fowler, M. “BlueGreenDeployment.” martinfowler.com (2010).</p></li>
+<li><p>Humble, J., Farley, D. “Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation.” Addison-Wesley (2010).</p></li>
+<li><p>Kleppmann, M. “Designing Data-Intensive Applications.” O’Reilly Media (2017).</p></li>
+<li><p>Newman, S. “Building Microservices: Designing Fine-Grained Systems.” O’Reilly Media (2015).</p></li>
+</ol>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">enhanced_adaptive_dbscan</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage_examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_features.html">Advanced Features</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithm Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Production Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#production-architecture">Production Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-management">Model Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deployment-strategies">Deployment Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-and-observability">Monitoring and Observability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scaling-and-performance">Scaling and Performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#security-considerations">Security Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-management">Configuration Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#disaster-recovery">Disaster Recovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="optimization.html" title="previous chapter">Optimization Reference</a></li>
+      <li>Next: <a href="../contributing.html" title="next chapter">Contributing</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Michael Kennedy.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/api/production.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Optimization Reference &#8212; enhanced_adaptive_dbscan November 2024 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=d3eb9a3c"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Production Reference" href="production.html" />
+    <link rel="prev" title="Algorithm Reference" href="algorithms.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="optimization-reference">
+<h1>Optimization Reference<a class="headerlink" href="#optimization-reference" title="Link to this heading">¶</a></h1>
+<p>Comprehensive documentation of optimization algorithms and strategies in the Enhanced Adaptive DBSCAN framework.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The optimization module provides automatic parameter tuning capabilities to find optimal clustering parameters for different datasets and use cases. The framework supports multiple optimization strategies, from simple grid search to advanced Bayesian optimization.</p>
+</section>
+<section id="parameter-optimization">
+<h2>Parameter Optimization<a class="headerlink" href="#parameter-optimization" title="Link to this heading">¶</a></h2>
+<section id="core-parameters">
+<h3>Core Parameters<a class="headerlink" href="#core-parameters" title="Link to this heading">¶</a></h3>
+<p>The framework optimizes the following key parameters:</p>
+<ul class="simple">
+<li><p><strong>eps</strong>: Neighborhood radius for density calculation</p></li>
+<li><p><strong>min_samples</strong>: Minimum points required to form a cluster</p></li>
+<li><p><strong>algorithm</strong>: Clustering algorithm variant</p></li>
+<li><p><strong>metric</strong>: Distance metric for neighborhood calculation</p></li>
+<li><p><strong>adaptive_eps</strong>: Enable/disable adaptive epsilon</p></li>
+<li><p><strong>multi_density</strong>: Multi-density clustering parameters</p></li>
+</ul>
+</section>
+<section id="parameter-spaces">
+<h3>Parameter Spaces<a class="headerlink" href="#parameter-spaces" title="Link to this heading">¶</a></h3>
+<p>Different parameter types require different optimization approaches:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">parameter_spaces</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;eps&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;continuous&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span>
+        <span class="s1">&#39;log_scale&#39;</span><span class="p">:</span> <span class="kc">False</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;min_samples&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;discrete&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;categorical&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;euclidean&#39;</span><span class="p">,</span> <span class="s1">&#39;manhattan&#39;</span><span class="p">,</span> <span class="s1">&#39;cosine&#39;</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="optimization-algorithms">
+<h2>Optimization Algorithms<a class="headerlink" href="#optimization-algorithms" title="Link to this heading">¶</a></h2>
+<section id="grid-search-optimization">
+<h3>Grid Search Optimization<a class="headerlink" href="#grid-search-optimization" title="Link to this heading">¶</a></h3>
+<p>Systematic exploration of parameter space through exhaustive search.</p>
+<p><strong>Algorithm:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">grid_search_optimization</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">scoring_func</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Grid search parameter optimization</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        X: Input data</span>
+<span class="sd">        param_grid: Dictionary of parameter ranges</span>
+<span class="sd">        scoring_func: Objective function to maximize</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        best_params: Optimal parameter combination</span>
+<span class="sd">        best_score: Best achieved score</span>
+<span class="sd">        results: Full grid search results</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">best_score</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">best_params</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># Generate all parameter combinations</span>
+    <span class="n">param_combinations</span> <span class="o">=</span> <span class="n">generate_param_combinations</span><span class="p">(</span><span class="n">param_grid</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">param_combinations</span><span class="p">:</span>
+        <span class="c1"># Evaluate clustering with current parameters</span>
+        <span class="n">clusterer</span> <span class="o">=</span> <span class="n">EnhancedAdaptiveDBSCAN</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">clusterer</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">scoring_func</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span>
+            <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="n">score</span>
+        <span class="p">})</span>
+        
+        <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">:</span>
+            <span class="n">best_score</span> <span class="o">=</span> <span class="n">score</span>
+            <span class="n">best_params</span> <span class="o">=</span> <span class="n">params</span>
+    
+    <span class="k">return</span> <span class="n">best_params</span><span class="p">,</span> <span class="n">best_score</span><span class="p">,</span> <span class="n">results</span>
+</pre></div>
+</div>
+<p><strong>Advantages:</strong></p>
+<ul class="simple">
+<li><p>Guaranteed to find global optimum (within grid)</p></li>
+<li><p>Simple to implement and understand</p></li>
+<li><p>Provides complete exploration results</p></li>
+</ul>
+<p><strong>Disadvantages:</strong></p>
+<ul class="simple">
+<li><p>Exponential complexity with parameter count</p></li>
+<li><p>May miss optimal values between grid points</p></li>
+<li><p>Computationally expensive for fine grids</p></li>
+</ul>
+</section>
+<section id="bayesian-optimization">
+<h3>Bayesian Optimization<a class="headerlink" href="#bayesian-optimization" title="Link to this heading">¶</a></h3>
+<p>Probabilistic optimization using Gaussian Process models to efficiently explore parameter space.</p>
+<p><strong>Core Components:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Gaussian Process Model</strong>: Models objective function</p></li>
+<li><p><strong>Acquisition Function</strong>: Guides parameter selection</p></li>
+<li><p><strong>Optimization Loop</strong>: Iteratively improves model</p></li>
+</ol>
+<p><strong>Implementation:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BayesianOptimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bayesian optimization for parameter tuning&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_space</span><span class="p">,</span> <span class="n">acquisition</span><span class="o">=</span><span class="s1">&#39;ei&#39;</span><span class="p">,</span> 
+                 <span class="n">n_initial</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_iterations</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter_space</span> <span class="o">=</span> <span class="n">parameter_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">=</span> <span class="n">acquisition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_initial</span> <span class="o">=</span> <span class="n">n_initial</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="n">n_iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gp_model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_observed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_observed</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective_function</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run Bayesian optimization&quot;&quot;&quot;</span>
+        <span class="c1"># Phase 1: Random initialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_random</span><span class="p">(</span><span class="n">objective_function</span><span class="p">)</span>
+        
+        <span class="c1"># Phase 2: Bayesian optimization loop</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span><span class="p">):</span>
+            <span class="c1"># Fit GP model to observations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fit_gp_model</span><span class="p">()</span>
+            
+            <span class="c1"># Find next point to evaluate</span>
+            <span class="n">next_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_next_point</span><span class="p">()</span>
+            
+            <span class="c1"># Evaluate objective function</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">next_params</span><span class="p">)</span>
+            
+            <span class="c1"># Update observations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_observations</span><span class="p">(</span><span class="n">next_params</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+        
+        <span class="c1"># Return best parameters found</span>
+        <span class="n">best_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_observed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_observed</span><span class="p">[</span><span class="n">best_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_observed</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit_gp_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit Gaussian Process model to observations&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.gaussian_process</span><span class="w"> </span><span class="kn">import</span> <span class="n">GaussianProcessRegressor</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.gaussian_process.kernels</span><span class="w"> </span><span class="kn">import</span> <span class="n">Matern</span>
+        
+        <span class="n">kernel</span> <span class="o">=</span> <span class="n">Matern</span><span class="p">(</span><span class="n">length_scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gp_model</span> <span class="o">=</span> <span class="n">GaussianProcessRegressor</span><span class="p">(</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+            <span class="n">normalize_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+        <span class="p">)</span>
+        
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_observed</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_observed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gp_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_select_next_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select next point using acquisition function&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">==</span> <span class="s1">&#39;ei&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expected_improvement</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span> <span class="o">==</span> <span class="s1">&#39;ucb&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper_confidence_bound</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown acquisition: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acquisition</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_expected_improvement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Expected Improvement acquisition function&quot;&quot;&quot;</span>
+        <span class="c1"># Generate candidate points</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_candidates</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate EI for each candidate</span>
+        <span class="n">ei_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">current_best</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_observed</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+            <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gp_model</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="n">candidate</span><span class="p">],</span> <span class="n">return_std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">std</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">mean</span> <span class="o">-</span> <span class="n">current_best</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span>
+                <span class="n">ei</span> <span class="o">=</span> <span class="p">(</span><span class="n">mean</span> <span class="o">-</span> <span class="n">current_best</span><span class="p">)</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">std</span> <span class="o">*</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ei</span> <span class="o">=</span> <span class="mi">0</span>
+            
+            <span class="n">ei_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ei</span><span class="p">)</span>
+        
+        <span class="c1"># Select candidate with highest EI</span>
+        <span class="n">best_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">ei_values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">candidates</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Acquisition Functions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Expected Improvement (EI)</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EI</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">μ</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">f_best</span><span class="p">)</span> <span class="o">*</span> <span class="n">Φ</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="n">σ</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">φ</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+<span class="n">where</span> <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">μ</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">f_best</span><span class="p">)</span> <span class="o">/</span> <span class="n">σ</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Upper Confidence Bound (UCB)</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UCB</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="n">μ</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">κ</span> <span class="o">*</span> <span class="n">σ</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">where</span> <span class="n">κ</span> <span class="n">controls</span> <span class="n">exploration</span> <span class="n">vs</span> <span class="n">exploitation</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Probability of Improvement (PI)</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PI</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="n">Φ</span><span class="p">((</span><span class="n">μ</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">f_best</span><span class="p">)</span> <span class="o">/</span> <span class="n">σ</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="genetic-algorithm-optimization">
+<h3>Genetic Algorithm Optimization<a class="headerlink" href="#genetic-algorithm-optimization" title="Link to this heading">¶</a></h3>
+<p>Evolutionary optimization inspired by natural selection and genetics.</p>
+<p><strong>Genetic Operations:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">GeneticOptimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Genetic algorithm for parameter optimization&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_space</span><span class="p">,</span> <span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> 
+                 <span class="n">generations</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">mutation_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">crossover_rate</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter_space</span> <span class="o">=</span> <span class="n">parameter_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population_size</span> <span class="o">=</span> <span class="n">population_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generations</span> <span class="o">=</span> <span class="n">generations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutation_rate</span> <span class="o">=</span> <span class="n">mutation_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crossover_rate</span> <span class="o">=</span> <span class="n">crossover_rate</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objective_function</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run genetic algorithm optimization&quot;&quot;&quot;</span>
+        <span class="c1"># Initialize population</span>
+        <span class="n">population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_population</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">generation</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generations</span><span class="p">):</span>
+            <span class="c1"># Evaluate fitness</span>
+            <span class="n">fitness_scores</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">objective_function</span><span class="p">(</span><span class="n">individual</span><span class="p">)</span> 
+                <span class="k">for</span> <span class="n">individual</span> <span class="ow">in</span> <span class="n">population</span>
+            <span class="p">]</span>
+            
+            <span class="c1"># Selection</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selection</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">fitness_scores</span><span class="p">)</span>
+            
+            <span class="c1"># Crossover and mutation</span>
+            <span class="n">offspring</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">):</span>
+                    <span class="n">child1</span><span class="p">,</span> <span class="n">child2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crossover</span><span class="p">(</span><span class="n">parents</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">parents</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">child1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutate</span><span class="p">(</span><span class="n">child1</span><span class="p">)</span>
+                    <span class="n">child2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutate</span><span class="p">(</span><span class="n">child2</span><span class="p">)</span>
+                    <span class="n">offspring</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">child1</span><span class="p">,</span> <span class="n">child2</span><span class="p">])</span>
+            
+            <span class="c1"># Combine and select next generation</span>
+            <span class="n">population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_survivor_selection</span><span class="p">(</span>
+                <span class="n">population</span> <span class="o">+</span> <span class="n">offspring</span><span class="p">,</span> 
+                <span class="n">objective_function</span>
+            <span class="p">)</span>
+        
+        <span class="c1"># Return best individual</span>
+        <span class="n">final_fitness</span> <span class="o">=</span> <span class="p">[</span><span class="n">objective_function</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">population</span><span class="p">]</span>
+        <span class="n">best_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">final_fitness</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">population</span><span class="p">[</span><span class="n">best_idx</span><span class="p">],</span> <span class="n">final_fitness</span><span class="p">[</span><span class="n">best_idx</span><span class="p">]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_crossover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent1</span><span class="p">,</span> <span class="n">parent2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Uniform crossover operation&quot;&quot;&quot;</span>
+        <span class="n">child1</span><span class="p">,</span> <span class="n">child2</span> <span class="o">=</span> <span class="n">parent1</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">parent2</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">crossover_rate</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">parent1</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                    <span class="n">child1</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">child2</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">child2</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">child1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">child1</span><span class="p">,</span> <span class="n">child2</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mutate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">individual</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gaussian mutation for continuous parameters&quot;&quot;&quot;</span>
+        <span class="n">mutated</span> <span class="o">=</span> <span class="n">individual</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">individual</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutation_rate</span><span class="p">:</span>
+                <span class="n">param_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_space</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                
+                <span class="k">if</span> <span class="n">param_info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+                    <span class="c1"># Gaussian mutation</span>
+                    <span class="n">bounds</span> <span class="o">=</span> <span class="n">param_info</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">]</span>
+                    <span class="n">std</span> <span class="o">=</span> <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.1</span>
+                    <span class="n">mutated</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                        <span class="n">value</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="p">),</span>
+                        <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">param_info</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;discrete&#39;</span><span class="p">:</span>
+                    <span class="c1"># Random selection from valid values</span>
+                    <span class="n">mutated</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">param_info</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">mutated</span>
+</pre></div>
+</div>
+<p><strong>Selection Strategies:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Tournament Selection</strong>: Compare random subsets</p></li>
+<li><p><strong>Roulette Wheel</strong>: Probability proportional to fitness</p></li>
+<li><p><strong>Rank Selection</strong>: Based on fitness ranking</p></li>
+<li><p><strong>Elitism</strong>: Preserve best individuals</p></li>
+</ol>
+</section>
+</section>
+<section id="multi-objective-optimization">
+<h2>Multi-Objective Optimization<a class="headerlink" href="#multi-objective-optimization" title="Link to this heading">¶</a></h2>
+<p>For scenarios with multiple competing objectives (e.g., clustering quality vs computational cost).</p>
+<section id="pareto-optimization">
+<h3>Pareto Optimization<a class="headerlink" href="#pareto-optimization" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ParetoOptimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multi-objective optimization using Pareto dominance&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectives</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="o">=</span> <span class="n">objectives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span> <span class="ow">or</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">objectives</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_dominated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solution1</span><span class="p">,</span> <span class="n">solution2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if solution1 is dominated by solution2&quot;&quot;&quot;</span>
+        <span class="n">scores1</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="p">(</span><span class="n">solution1</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">]</span>
+        <span class="n">scores2</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="p">(</span><span class="n">solution2</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">]</span>
+        
+        <span class="c1"># Weighted comparison</span>
+        <span class="n">weighted_scores1</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="o">*</span> <span class="n">w</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">scores1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)]</span>
+        <span class="n">weighted_scores2</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="o">*</span> <span class="n">w</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">scores2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)]</span>
+        
+        <span class="c1"># Check dominance</span>
+        <span class="n">better_or_equal</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">s2</span> <span class="o">&gt;=</span> <span class="n">s1</span> <span class="k">for</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="ow">in</span> 
+                             <span class="nb">zip</span><span class="p">(</span><span class="n">weighted_scores1</span><span class="p">,</span> <span class="n">weighted_scores2</span><span class="p">))</span>
+        <span class="n">strictly_better</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">s2</span> <span class="o">&gt;</span> <span class="n">s1</span> <span class="k">for</span> <span class="n">s1</span><span class="p">,</span> <span class="n">s2</span> <span class="ow">in</span> 
+                             <span class="nb">zip</span><span class="p">(</span><span class="n">weighted_scores1</span><span class="p">,</span> <span class="n">weighted_scores2</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="n">better_or_equal</span> <span class="ow">and</span> <span class="n">strictly_better</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_pareto_front</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solutions</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find Pareto optimal solutions&quot;&quot;&quot;</span>
+        <span class="n">pareto_front</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">solutions</span><span class="p">:</span>
+            <span class="n">is_dominated</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">solutions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">candidate</span> <span class="o">!=</span> <span class="n">other</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dominated</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+                    <span class="n">is_dominated</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dominated</span><span class="p">:</span>
+                <span class="n">pareto_front</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">pareto_front</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="adaptive-optimization-strategies">
+<h2>Adaptive Optimization Strategies<a class="headerlink" href="#adaptive-optimization-strategies" title="Link to this heading">¶</a></h2>
+<section id="meta-learning-approach">
+<h3>Meta-Learning Approach<a class="headerlink" href="#meta-learning-approach" title="Link to this heading">¶</a></h3>
+<p>Learn from previous optimization experiences to accelerate future optimizations.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MetaLearningOptimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta-learning for parameter optimization&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_extractor</span><span class="p">,</span> <span class="n">base_optimizer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_extractor</span> <span class="o">=</span> <span class="n">feature_extractor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_optimizer</span> <span class="o">=</span> <span class="n">base_optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experience_database</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Optimize using meta-learning&quot;&quot;&quot;</span>
+        <span class="c1"># Extract dataset features</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_extractor</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        
+        <span class="c1"># Find similar datasets from experience</span>
+        <span class="n">similar_cases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_similar_datasets</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        
+        <span class="c1"># Initialize optimization with prior knowledge</span>
+        <span class="k">if</span> <span class="n">similar_cases</span><span class="p">:</span>
+            <span class="n">initial_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregate_prior_knowledge</span><span class="p">(</span><span class="n">similar_cases</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_optimizer</span><span class="o">.</span><span class="n">set_initial_parameters</span><span class="p">(</span><span class="n">initial_params</span><span class="p">)</span>
+        
+        <span class="c1"># Run optimization</span>
+        <span class="n">best_params</span><span class="p">,</span> <span class="n">best_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        
+        <span class="c1"># Store experience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_store_experience</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">best_params</span><span class="p">,</span> <span class="n">best_score</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">best_params</span><span class="p">,</span> <span class="n">best_score</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_similar_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find k most similar datasets from experience&quot;&quot;&quot;</span>
+        <span class="n">similarities</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experience_database</span><span class="p">:</span>
+            <span class="n">similarity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_similarity</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">exp</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">])</span>
+            <span class="n">similarities</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">similarity</span><span class="p">,</span> <span class="n">exp</span><span class="p">))</span>
+        
+        <span class="c1"># Return top k similar cases</span>
+        <span class="n">similarities</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">exp</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">similarities</span><span class="p">[:</span><span class="n">k</span><span class="p">]]</span>
+</pre></div>
+</div>
+</section>
+<section id="warm-start-strategies">
+<h3>Warm-Start Strategies<a class="headerlink" href="#warm-start-strategies" title="Link to this heading">¶</a></h3>
+<p>Initialize optimization with good starting points based on data characteristics.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">warm_start_initialization</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_candidates</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate good initial parameter candidates&quot;&quot;&quot;</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># Strategy 1: K-distance analysis</span>
+    <span class="n">k_distances</span> <span class="o">=</span> <span class="n">calculate_k_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">eps_candidates</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">k_distances</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">90</span><span class="p">]</span>
+    <span class="p">]</span>
+    
+    <span class="c1"># Strategy 2: Nearest neighbor analysis</span>
+    <span class="n">nn_analysis</span> <span class="o">=</span> <span class="n">analyze_nearest_neighbors</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">min_samples_candidates</span> <span class="o">=</span> <span class="n">nn_analysis</span><span class="p">[</span><span class="s1">&#39;suggested_min_samples&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># Strategy 3: Density estimation</span>
+    <span class="n">density_regions</span> <span class="o">=</span> <span class="n">estimate_density_regions</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">adaptive_candidates</span> <span class="o">=</span> <span class="n">density_regions</span><span class="p">[</span><span class="s1">&#39;suggested_adaptive&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># Combine strategies</span>
+    <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="n">eps_candidates</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">min_samples</span> <span class="ow">in</span> <span class="n">min_samples_candidates</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">adaptive</span> <span class="ow">in</span> <span class="n">adaptive_candidates</span><span class="p">:</span>
+                <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s1">&#39;eps&#39;</span><span class="p">:</span> <span class="n">eps</span><span class="p">,</span>
+                    <span class="s1">&#39;min_samples&#39;</span><span class="p">:</span> <span class="n">min_samples</span><span class="p">,</span>
+                    <span class="s1">&#39;adaptive_eps&#39;</span><span class="p">:</span> <span class="n">adaptive</span>
+                <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="n">candidates</span><span class="p">[:</span><span class="n">n_candidates</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="objective-functions">
+<h2>Objective Functions<a class="headerlink" href="#objective-functions" title="Link to this heading">¶</a></h2>
+<section id="standard-clustering-metrics">
+<h3>Standard Clustering Metrics<a class="headerlink" href="#standard-clustering-metrics" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">silhouette_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Silhouette score objective (higher is better)&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span>
+    <span class="k">return</span> <span class="n">silhouette_score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">davies_bouldin_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Davies-Bouldin index objective (lower is better, so negate)&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">davies_bouldin_score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calinski_harabasz_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calinski-Harabasz index objective (higher is better)&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="n">calinski_harabasz_score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="composite-objectives">
+<h3>Composite Objectives<a class="headerlink" href="#composite-objectives" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">composite_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Weighted combination of multiple objectives&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;silhouette&#39;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s1">&#39;davies_bouldin&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;calinski&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">}</span>
+    
+    <span class="n">scores</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;silhouette&#39;</span><span class="p">:</span> <span class="n">silhouette_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">),</span>
+        <span class="s1">&#39;davies_bouldin&#39;</span><span class="p">:</span> <span class="n">davies_bouldin_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">),</span>
+        <span class="s1">&#39;calinski&#39;</span><span class="p">:</span> <span class="n">calinski_harabasz_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span>  <span class="c1"># Normalize</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Weighted combination</span>
+    <span class="n">total_score</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+        <span class="n">weight</span> <span class="o">*</span> <span class="n">scores</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> 
+        <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">weights</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">total_score</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-domain-objectives">
+<h3>Custom Domain Objectives<a class="headerlink" href="#custom-domain-objectives" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">anomaly_detection_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">known_anomalies</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Objective function for anomaly detection scenarios&quot;&quot;&quot;</span>
+    <span class="n">base_score</span> <span class="o">=</span> <span class="n">silhouette_objective</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">known_anomalies</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Bonus for correctly identifying known anomalies as noise</span>
+        <span class="n">noise_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">anomaly_detection_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">noise_points</span><span class="p">[</span><span class="n">known_anomalies</span><span class="p">])</span>
+        <span class="n">base_score</span> <span class="o">+=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">anomaly_detection_rate</span>
+    
+    <span class="c1"># Penalty for too many noise points</span>
+    <span class="n">noise_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">noise_ratio</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">:</span>  <span class="c1"># More than 10% noise is penalized</span>
+        <span class="n">base_score</span> <span class="o">-=</span> <span class="p">(</span><span class="n">noise_ratio</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span>
+    
+    <span class="k">return</span> <span class="n">base_score</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="optimization-pipelines">
+<h2>Optimization Pipelines<a class="headerlink" href="#optimization-pipelines" title="Link to this heading">¶</a></h2>
+<section id="hierarchical-optimization">
+<h3>Hierarchical Optimization<a class="headerlink" href="#hierarchical-optimization" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HierarchicalOptimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimize parameters in multiple stages&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stages</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stages</span> <span class="o">=</span> <span class="n">stages</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run hierarchical optimization&quot;&quot;&quot;</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">stage_name</span><span class="p">,</span> <span class="n">stage_config</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stages</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Optimizing stage: </span><span class="si">{</span><span class="n">stage_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            
+            <span class="c1"># Extract stage-specific parameters</span>
+            <span class="n">stage_params</span> <span class="o">=</span> <span class="n">stage_config</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">stage_config</span><span class="p">[</span><span class="s1">&#39;optimizer&#39;</span><span class="p">]</span>
+            
+            <span class="c1"># Use previous results as constraints</span>
+            <span class="k">if</span> <span class="n">best_params</span><span class="p">:</span>
+                <span class="n">optimizer</span><span class="o">.</span><span class="n">set_constraints</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
+            
+            <span class="c1"># Optimize current stage</span>
+            <span class="n">stage_best</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">stage_params</span><span class="p">)</span>
+            
+            <span class="c1"># Update best parameters</span>
+            <span class="n">best_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">stage_best</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">best_params</span>
+
+<span class="c1"># Example usage</span>
+<span class="n">stages</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;coarse&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;min_samples&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">GridSearchOptimizer</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="s1">&#39;coarse&#39;</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;fine&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;eps&#39;</span><span class="p">,</span> <span class="s1">&#39;min_samples&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">BayesianOptimizer</span><span class="p">(</span><span class="n">n_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;advanced&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;adaptive_eps&#39;</span><span class="p">,</span> <span class="s1">&#39;multi_density&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">GeneticOptimizer</span><span class="p">(</span><span class="n">generations</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="ensemble-optimization">
+<h3>Ensemble Optimization<a class="headerlink" href="#ensemble-optimization" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">EnsembleOptimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine multiple optimization strategies&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizers</span><span class="p">,</span> <span class="n">voting_strategy</span><span class="o">=</span><span class="s1">&#39;weighted&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizers</span> <span class="o">=</span> <span class="n">optimizers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voting_strategy</span> <span class="o">=</span> <span class="n">voting_strategy</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run ensemble optimization&quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="c1"># Run each optimizer</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">optimizer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">best_params</span><span class="p">,</span> <span class="n">best_score</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">best_params</span><span class="p">,</span>
+                <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="n">best_score</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Combine results</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">voting_strategy</span> <span class="o">==</span> <span class="s1">&#39;best&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_best</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">voting_strategy</span> <span class="o">==</span> <span class="s1">&#39;weighted&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weighted_combination</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_consensus_voting</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-considerations">
+<h2>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading">¶</a></h2>
+<section id="optimization-budget-management">
+<h3>Optimization Budget Management<a class="headerlink" href="#optimization-budget-management" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">BudgetManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manage computational budget for optimization&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_evaluations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_time</span><span class="o">=</span><span class="mi">3600</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_evaluations</span> <span class="o">=</span> <span class="n">max_evaluations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluations_used</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_optimization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start budget tracking&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluations_used</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">can_continue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if optimization can continue&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluations_used</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_evaluations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="ow">and</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_evaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Record an evaluation&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluations_used</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="early-stopping">
+<h3>Early Stopping<a class="headerlink" href="#early-stopping" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">EarlyStopping</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Early stopping for optimization convergence&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_improvement</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">=</span> <span class="n">patience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_improvement</span> <span class="o">=</span> <span class="n">min_improvement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">should_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_score</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if optimization should stop early&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">current_score</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_improvement</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_score</span> <span class="o">=</span> <span class="n">current_score</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>Brochu, E., et al. “A tutorial on Bayesian optimization of expensive cost functions.” arXiv preprint arXiv:1012.2599 (2010).</p></li>
+<li><p>Bergstra, J., Bengio, Y. “Random search for hyper-parameter optimization.” JMLR 13 (2012).</p></li>
+<li><p>Snoek, J., et al. “Practical Bayesian optimization of machine learning algorithms.” NIPS 2012.</p></li>
+<li><p>Deb, K., et al. “A fast and elitist multiobjective genetic algorithm: NSGA-II.” IEEE Trans. Evolutionary Computation 6.2 (2002).</p></li>
+</ol>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">enhanced_adaptive_dbscan</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage_examples.html">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_features.html">Advanced Features</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithm Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Optimization Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameter-optimization">Parameter Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optimization-algorithms">Optimization Algorithms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-objective-optimization">Multi-Objective Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adaptive-optimization-strategies">Adaptive Optimization Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objective-functions">Objective Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optimization-pipelines">Optimization Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="algorithms.html" title="previous chapter">Algorithm Reference</a></li>
+      <li>Next: <a href="production.html" title="next chapter">Production Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Michael Kennedy.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/api/optimization.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
