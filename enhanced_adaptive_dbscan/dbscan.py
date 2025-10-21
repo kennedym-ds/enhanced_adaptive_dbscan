@@ -785,6 +785,20 @@ class EnhancedAdaptiveDBSCAN(BaseEstimator, ClusterMixin):
             # Use subsampled clusters as full clusters
             self.labels_ = labels_sub
 
+        # Preserve training data for predict() method (store processed data and labels)
+        # Only store if not subsampled to avoid memory issues with large datasets
+        if n_points <= self.max_points:
+            self._X_train_ = X_processed.copy()
+            self._labels_train_ = self.labels_.copy()
+        else:
+            # For subsampled data, warn that predict() won't be available
+            self._X_train_ = None
+            self._labels_train_ = None
+            self.logger.warning(
+                "Dataset was subsampled. predict() method will not be available. "
+                "Use fit_incremental() to add new points instead."
+            )
+        
         # Finish fit
         self.logger.info("Fitting completed.")
         return self
@@ -1009,6 +1023,117 @@ class EnhancedAdaptiveDBSCAN(BaseEstimator, ClusterMixin):
         """Fit to X and return cluster labels, per sklearn ClusterMixin."""
         self.fit(X, y=y, additional_attributes=additional_attributes)
         return self.labels_
+
+    def predict(self, X, additional_attributes=None):
+        """
+        Predict cluster labels for new data points using the trained model.
+        
+        This method assigns new points to existing clusters based on proximity
+        to cluster cores and local density patterns. Points that don't meet
+        cluster membership criteria are labeled as noise (-1).
+        
+        Parameters:
+        -----------
+        X : ndarray, shape (n_samples, n_features)
+            New data points to predict cluster labels for
+        additional_attributes : ndarray or None, shape (n_samples, n_additional_features)
+            Additional attributes for new points (if used during training)
+            
+        Returns:
+        --------
+        labels : ndarray, shape (n_samples,)
+            Cluster labels for new data points. -1 indicates noise.
+            
+        Raises:
+        -------
+        ValueError
+            If the model has not been fitted yet
+            
+        Notes:
+        ------
+        This implements approximate prediction similar to HDBSCAN's predict method (2024).
+        New points are assigned to the nearest cluster within eps radius, weighted by
+        local density. This provides better integration with scikit-learn pipelines.
+        
+        Examples:
+        ---------
+        >>> from enhanced_adaptive_dbscan import EnhancedAdaptiveDBSCAN
+        >>> import numpy as np
+        >>> X_train = np.random.randn(100, 2)
+        >>> X_test = np.random.randn(20, 2)
+        >>> model = EnhancedAdaptiveDBSCAN(k=10)
+        >>> model.fit(X_train)
+        >>> labels = model.predict(X_test)
+        """
+        # Check if model is fitted
+        check_is_fitted(self, ['labels_', 'scaler_'])
+        
+        if not hasattr(self, '_X_train_'):
+            raise ValueError(
+                "Cannot predict: training data was not preserved. "
+                "This may happen if the dataset was subsampled. "
+                "Use fit_incremental() instead for adding new points."
+            )
+        
+        # Preprocess features for new data
+        if additional_attributes is not None:
+            X_full = np.hstack((X, additional_attributes))
+        else:
+            X_full = X
+            
+        X_processed = self.preprocess_features(X_full)
+        
+        # Get training data (core points only for efficiency)
+        X_train = self._X_train_
+        labels_train = self._labels_train_
+        
+        # Filter to core points (non-noise)
+        core_mask = labels_train != -1
+        X_core = X_train[core_mask]
+        labels_core = labels_train[core_mask]
+        
+        if len(X_core) == 0:
+            # No core points - all new points are noise
+            return np.full(len(X_processed), -1, dtype=int)
+        
+        # Build KDTree on core points for efficient neighbor search
+        tree = KDTree(X_core)
+        
+        # Compute adaptive eps for each new point
+        local_density = self.compute_local_density(X_processed)
+        mean_density = np.mean(local_density)
+        density_factors = local_density / (mean_density + 1e-10)
+        
+        # Adaptive eps based on density
+        base_eps = self.density_scaling if hasattr(self, 'density_scaling') else 0.5
+        adaptive_eps = base_eps / (density_factors ** 0.5 + 1e-5)
+        
+        # Predict labels for new points
+        predicted_labels = np.full(len(X_processed), -1, dtype=int)
+        
+        for i, (point, eps) in enumerate(zip(X_processed, adaptive_eps)):
+            # Find neighbors within eps radius
+            indices = tree.query_radius([point], r=eps)[0]
+            
+            if len(indices) > 0:
+                # Get labels of neighbors
+                neighbor_labels = labels_core[indices]
+                
+                # Majority vote among neighbors (excluding noise)
+                unique_labels, counts = np.unique(neighbor_labels, return_counts=True)
+                
+                # Remove noise label if present
+                non_noise_mask = unique_labels != -1
+                if np.any(non_noise_mask):
+                    unique_labels = unique_labels[non_noise_mask]
+                    counts = counts[non_noise_mask]
+                    
+                    if len(unique_labels) > 0:
+                        # Assign to most common cluster
+                        predicted_labels[i] = unique_labels[np.argmax(counts)]
+                # If all neighbors are noise or no valid labels, point remains noise (-1)
+        
+        return predicted_labels
 
     def _more_tags(self):
         # Indicate that y is not required
