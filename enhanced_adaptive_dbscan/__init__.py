@@ -7,6 +7,11 @@ from .density_engine import (
     DensityRegion,
     DensityAnalysis
 )
+from .utils import (
+    compute_kdist_graph,
+    find_kdist_elbow,
+    suggest_dbscan_parameters
+)
 
 # Phase 4: Production Pipeline & Enterprise Integration
 try:
@@ -27,6 +32,9 @@ try:
         'DynamicBoundaryManager',
         'DensityRegion',
         'DensityAnalysis',
+        'compute_kdist_graph',
+        'find_kdist_elbow',
+        'suggest_dbscan_parameters',
         # Phase 4 components
         'StreamingClusteringEngine',
         'StreamingConfig',
@@ -51,7 +59,10 @@ except ImportError as e:
         'RelativeDensityComputer', 
         'DynamicBoundaryManager',
         'DensityRegion',
-        'DensityAnalysis'
+        'DensityAnalysis',
+        'compute_kdist_graph',
+        'find_kdist_elbow',
+        'suggest_dbscan_parameters'
     ]
     
     import warnings
