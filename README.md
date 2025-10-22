@@ -38,6 +38,13 @@ A **comprehensive adaptive clustering framework** featuring three specialized cl
 - **RESTful Web API:** Flask-based API with health monitoring and clustering endpoints
 - **Enterprise Integration:** Configuration management, deployment automation, and monitoring
 
+### 🚀 Phase 5: Advanced Clustering Enhancements (NEW!)
+- **Deep Learning Integration:** Neural network-based clustering with autoencoders and DEC
+- **Scalable Indexing:** Approximate nearest neighbor search for millions of points (Annoy/FAISS)
+- **Complete HDBSCAN:** Full hierarchical density-based clustering with stability selection
+- **Hybrid Approaches:** Combine deep learning with traditional clustering methods
+- **Distributed Processing:** Parallel clustering for large-scale datasets
+
 ## 📦 Installation
 
 Install from PyPI:
@@ -52,6 +59,19 @@ For Phase 4 production features, install with additional dependencies:
 pip install enhanced-adaptive-dbscan[production]
 # or manually install Flask dependencies:
 pip install enhanced-adaptive-dbscan flask flask-cors pyyaml
+```
+
+For Phase 5 advanced features (deep learning, scalable indexing):
+
+```bash
+# For deep learning clustering with PyTorch
+pip install enhanced-adaptive-dbscan torch
+
+# For scalable approximate nearest neighbor search
+pip install enhanced-adaptive-dbscan annoy  # or faiss-cpu for FAISS
+
+# Install all advanced features
+pip install enhanced-adaptive-dbscan[production] torch annoy
 ```
 
 Or install from source:
@@ -203,6 +223,125 @@ api = ClusteringWebAPI(host="localhost", port=5001, debug=False)
 # POST to http://localhost:5001/api/cluster for clustering requests
 ```
 
+### Scalable Clustering (Phase 5)
+
+```python
+from enhanced_adaptive_dbscan import ScalableDBSCAN, ScalableIndexManager
+import numpy as np
+
+# For datasets with millions of points
+X = np.random.randn(1_000_000, 10)  # 1M points
+
+# Scalable DBSCAN with approximate nearest neighbors
+scalable_dbscan = ScalableDBSCAN(
+    eps=0.5,
+    min_samples=10,
+    n_jobs=-1  # Use all CPUs
+)
+
+labels = scalable_dbscan.fit_predict(X)
+print(f"Clustered {len(X)} points into {len(set(labels))} clusters")
+
+# Or use the index manager directly for more control
+from enhanced_adaptive_dbscan import IndexConfig
+
+config = IndexConfig(
+    method='auto',  # Automatically selects best method (annoy/faiss/kdtree)
+    metric='euclidean'
+)
+
+index_manager = ScalableIndexManager(config)
+index_manager.build_index(X)
+
+# Query nearest neighbors efficiently
+distances, indices = index_manager.query_neighbors(X[:100], k=10)
+```
+
+### HDBSCAN Hierarchical Clustering (Phase 5)
+
+```python
+from enhanced_adaptive_dbscan import HDBSCANClusterer
+import numpy as np
+
+# Multi-density data
+X = np.vstack([
+    np.random.randn(100, 2) * 0.3,       # Dense cluster
+    np.random.randn(50, 2) * 0.8 + 5,    # Sparse cluster
+    np.random.randn(30, 2) * 0.5 + [3, 3] # Medium cluster
+])
+
+# HDBSCAN with stability-based selection
+hdbscan = HDBSCANClusterer(
+    min_cluster_size=15,
+    min_samples=5,
+    metric='euclidean'
+)
+
+labels = hdbscan.fit_predict(X)
+
+# Get detailed cluster information
+info = hdbscan.get_cluster_info()
+print(f"Found {info['n_clusters']} stable clusters")
+print(f"Cluster persistence: {info['cluster_persistence']}")
+```
+
+### Deep Learning Clustering (Phase 5)
+
+```python
+from enhanced_adaptive_dbscan import DeepClusteringEngine, HybridDeepDBSCAN
+import numpy as np
+
+# High-dimensional wafer data
+X = np.random.randn(500, 50)  # 50 features
+
+# Method 1: Autoencoder-based clustering
+deep_engine = DeepClusteringEngine(
+    method='autoencoder',
+    latent_dim=10,
+    n_clusters=5,
+    n_epochs=100
+)
+
+result = deep_engine.fit_transform(X)
+print(f"Reconstruction error: {result.reconstruction_error:.4f}")
+print(f"Found {len(set(result.labels))} clusters")
+
+# Method 2: Hybrid Deep+DBSCAN approach
+hybrid = HybridDeepDBSCAN(
+    latent_dim=10,
+    n_epochs=50,
+    dbscan_params={'min_samples': 5}
+)
+
+labels = hybrid.fit_predict(X)
+embeddings = hybrid.get_embeddings(X)  # Get learned representations
+print(f"Reduced {X.shape[1]}D to {embeddings.shape[1]}D")
+```
+
+### Distributed Clustering (Phase 5)
+
+```python
+from enhanced_adaptive_dbscan import DistributedClusteringCoordinator
+import numpy as np
+
+# Very large dataset
+X = np.random.randn(5_000_000, 20)  # 5M points
+
+coordinator = DistributedClusteringCoordinator(n_workers=-1)
+
+# Build index
+from enhanced_adaptive_dbscan import ScalableIndexManager
+index = ScalableIndexManager()
+index.build_index(X)
+
+# Distributed density estimation
+densities = coordinator.distributed_density_estimation(
+    X, k=20, index=index
+)
+
+print(f"Computed densities for {len(X)} points in parallel")
+```
+
 ## 📚 Documentation
 
 - **API Reference:** [Full documentation](https://kennedym-ds.github.io/enhanced_adaptive_dbscan/)
@@ -252,7 +391,7 @@ make html
 
 ## 🔬 Algorithm Overview
 
-The Enhanced Adaptive DBSCAN framework provides three complementary clustering approaches:
+The Enhanced Adaptive DBSCAN framework provides five complementary clustering approaches:
 
 ### 🎯 Phase 1: Core Adaptive DBSCAN
 
@@ -321,6 +460,23 @@ The Enhanced Adaptive DBSCAN framework provides three complementary clustering a
 3. **Web API**: RESTful endpoints for enterprise integration
 4. **Model Store**: Versioned model persistence and retrieval
 5. **Performance Monitor**: Operational metrics and alerting
+
+### 🚀 Phase 5: Advanced Clustering Enhancements
+
+**Key Innovation**: State-of-the-art deep learning and scalability features
+
+- **Deep Learning Clustering**: Autoencoder-based representation learning and DEC
+- **Scalable Approximate NN**: Efficient nearest neighbor search for millions of points
+- **Complete HDBSCAN**: Hierarchical clustering with minimum spanning trees
+- **Hybrid Approaches**: Combine deep learning with traditional methods
+- **Distributed Processing**: Parallel computation for large-scale datasets
+
+**Advanced Components**:
+1. **Deep Clustering Engine**: Neural network-based clustering (autoencoder, DEC)
+2. **Scalable Indexing**: Approximate NN with Annoy/FAISS/KDTree
+3. **HDBSCAN Implementation**: MST-based hierarchical clustering
+4. **Hybrid Models**: Deep learning + traditional clustering fusion
+5. **Distributed Coordinator**: Multi-core parallel processing
 
 ## 🧮 Technical Details
 

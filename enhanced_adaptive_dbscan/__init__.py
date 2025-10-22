@@ -8,6 +8,36 @@ from .density_engine import (
     DensityAnalysis
 )
 
+# Phase 5: Advanced Clustering Enhancements
+try:
+    from .deep_clustering import (
+        DeepClusteringEngine,
+        DeepClusteringResult,
+        HybridDeepDBSCAN,
+        TORCH_AVAILABLE
+    )
+    DEEP_CLUSTERING_AVAILABLE = True
+except ImportError:
+    DEEP_CLUSTERING_AVAILABLE = False
+
+from .scalable_indexing import (
+    ScalableIndexManager,
+    ScalableDBSCAN,
+    IndexConfig,
+    ChunkedProcessor,
+    DistributedClusteringCoordinator,
+    ANNOY_AVAILABLE,
+    FAISS_AVAILABLE
+)
+
+from .hdbscan_clustering import (
+    HDBSCANClusterer,
+    MinimumSpanningTree,
+    HierarchicalClusterTree,
+    CondensedTree,
+    StabilityBasedSelector
+)
+
 # Phase 4: Production Pipeline & Enterprise Integration
 try:
     from .streaming_engine import StreamingClusteringEngine, StreamingConfig, ConceptDriftDetector
@@ -38,8 +68,26 @@ try:
         'PerformanceMonitor',
         'ClusteringWebAPI',
         'create_production_pipeline',
-        'create_deployment_config'
+        'create_deployment_config',
+        # Phase 5 components
+        'ScalableIndexManager',
+        'ScalableDBSCAN',
+        'IndexConfig',
+        'ChunkedProcessor',
+        'DistributedClusteringCoordinator',
+        'HDBSCANClusterer',
+        'MinimumSpanningTree',
+        'HierarchicalClusterTree',
+        'CondensedTree',
+        'StabilityBasedSelector',
     ]
+    
+    if DEEP_CLUSTERING_AVAILABLE:
+        __all__.extend([
+            'DeepClusteringEngine',
+            'DeepClusteringResult',
+            'HybridDeepDBSCAN',
+        ])
     
 except ImportError as e:
     # Phase 4 dependencies not available
@@ -51,8 +99,26 @@ except ImportError as e:
         'RelativeDensityComputer', 
         'DynamicBoundaryManager',
         'DensityRegion',
-        'DensityAnalysis'
+        'DensityAnalysis',
+        # Phase 5 components (always available)
+        'ScalableIndexManager',
+        'ScalableDBSCAN',
+        'IndexConfig',
+        'ChunkedProcessor',
+        'DistributedClusteringCoordinator',
+        'HDBSCANClusterer',
+        'MinimumSpanningTree',
+        'HierarchicalClusterTree',
+        'CondensedTree',
+        'StabilityBasedSelector',
     ]
+    
+    if DEEP_CLUSTERING_AVAILABLE:
+        __all__.extend([
+            'DeepClusteringEngine',
+            'DeepClusteringResult',
+            'HybridDeepDBSCAN',
+        ])
     
     import warnings
     warnings.warn(
