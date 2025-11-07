@@ -28,7 +28,7 @@ This is a comprehensive adaptive clustering framework featuring Enhanced Adaptiv
 ### Test Framework
 - Use **pytest** for all tests
 - Tests are located in the `tests/` directory
-- Run tests with: `pytest -q --cov=enhanced_adaptive_dbscan --cov-report=term-missing`
+- Run tests with: `pytest --cov=enhanced_adaptive_dbscan --cov-report=term-missing`
 
 ### Test Coverage
 - Aim for high test coverage (project uses codecov)
