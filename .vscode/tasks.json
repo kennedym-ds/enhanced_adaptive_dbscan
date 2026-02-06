@@ -14,199 +14,196 @@
 		}
 	},
 	"tasks": [
+		// ===== Environment Setup =====
 		{
 			"label": "venv: create (.venv, py -3.12)",
 			"type": "shell",
-			"command": "py -3.12 -m venv .venv"
+			"command": "if (Test-Path .venv) { Write-Host 'Removing existing virtual environment...' -ForegroundColor Yellow; Remove-Item -Recurse -Force .venv -ErrorAction SilentlyContinue }; Write-Host 'Creating new virtual environment...' -ForegroundColor Green; py -3.12 -m venv .venv",
+			"problemMatcher": []
+		},
+		{
+			"label": "venv: activate",
+			"type": "shell",
+			"command": "if (Test-Path .venv\\Scripts\\Activate.ps1) { & .venv\\Scripts\\Activate.ps1 } else { Write-Host 'Virtual environment not found. Please create it first using: venv: create (.venv, py -3.12)' -ForegroundColor Red }",
+			"options": {
+				"shell": {
+					"executable": "powershell.exe",
+					"args": [
+						"-NoProfile",
+						"-ExecutionPolicy",
+						"Bypass",
+						"-Command"
+					]
+				}
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
 		},
 		{
 			"label": "venv: refresh (recreate & pip -U)",
 			"type": "shell",
-			"command": "if (Test-Path .venv) { Remove-Item -Recurse -Force .venv }; py -3.12 -m venv .venv; .\\.venv\\Scripts\\python -m pip install -U pip"
+			"command": "if (Test-Path .venv) { Remove-Item -Recurse -Force .venv }; py -3.12 -m venv .venv; .\\.venv\\Scripts\\python -m pip install -U pip",
+			"problemMatcher": []
 		},
 		{
 			"label": "install: deps (requirements.txt)",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -r requirements.txt",
-			"dependsOn": [
-				"venv: create (.venv, py -3.12)"
-			]
+			"dependsOn": ["venv: create (.venv, py -3.12)"],
+			"problemMatcher": []
 		},
 		{
 			"label": "install: project (editable)",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -e .",
-			"dependsOn": [
-				"install: deps (requirements.txt)"
-			]
+			"dependsOn": ["install: deps (requirements.txt)"],
+			"problemMatcher": []
 		},
+
+		// ===== Code Quality =====
 		{
 			"label": "lint: ruff check",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -U ruff; .\\.venv\\Scripts\\ruff check .",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"dependsOn": ["install: project (editable)"],
+			"problemMatcher": ["$python"]
 		},
 		{
 			"label": "format: ruff format",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -U ruff; .\\.venv\\Scripts\\ruff format .",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"dependsOn": ["install: project (editable)"],
+			"problemMatcher": []
 		},
 		{
 			"label": "lint: ruff (check + format)",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -U ruff; .\\.venv\\Scripts\\ruff check .; .\\.venv\\Scripts\\ruff format --check .",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"dependsOn": ["install: project (editable)"],
+			"problemMatcher": ["$python"]
 		},
 		{
 			"label": "type-check: mypy",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -U mypy types-setuptools; .\\.venv\\Scripts\\mypy .",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"dependsOn": ["install: project (editable)"],
+			"problemMatcher": ["$python"]
 		},
+
+		// ===== Testing =====
 		{
 			"label": "test: pytest",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -U pytest; .\\.venv\\Scripts\\python -m pytest -q",
-			"dependsOn": [
-				"install: project (editable)"
-			],
+			"dependsOn": ["install: project (editable)"],
 			"group": {
 				"kind": "test",
 				"isDefault": true
-			}
+			},
+			"problemMatcher": ["$python"]
 		},
 		{
 			"label": "test: pytest with coverage",
 			"type": "shell",
-			"command": ".\\.venv\\Scripts\\python -m pip install -U pytest pytest-cov; .\\.venv\\Scripts\\python -m pytest -q --cov=enhanced_adaptive_dbscan --cov-report=term-missing --cov-report=html",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"command": ".\\.venv\\Scripts\\python -m pip install -U pytest pytest-cov; .\\.venv\\Scripts\\python -m pytest -q --cov=wafer_defect_clustering --cov-report=term-missing --cov-report=html",
+			"dependsOn": ["install: project (editable)"],
+			"group": "test",
+			"problemMatcher": ["$python"]
 		},
 		{
 			"label": "test: full suite",
 			"type": "shell",
-			"command": "python -m pytest tests/ -v --tb=short",
+			"command": ".\\.venv\\Scripts\\python -m pytest tests/ -v --tb=short",
+			"dependsOn": ["install: project (editable)"],
 			"group": {
 				"kind": "test",
 				"isDefault": false
-			}
+			},
+			"problemMatcher": ["$python"]
 		},
-		{
-			"label": "test: adaptive optimization",
-			"type": "shell",
-			"command": "python -m pytest tests/test_adaptive_optimization.py -v",
-			"group": "test"
-		},
-		{
-			"label": "test: ensemble clustering",
-			"type": "shell",
-			"command": "python -m pytest tests/test_ensemble_clustering.py -v",
-			"group": "test"
-		},
-		{
-			"label": "test: multi-density clustering",
-			"type": "shell",
-			"command": "python -m pytest tests/test_multi_density_clustering.py -v",
-			"group": "test"
-		},
-		{
-			"label": "test: production features",
-			"type": "shell",
-			"command": "python -m pytest tests/test_production_*.py -v",
-			"group": "test"
-		},
+
+		// ===== Build & Package =====
 		{
 			"label": "build: sdist+wheel",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -U build wheel; .\\.venv\\Scripts\\python -m build",
-			"dependsOn": [
-				"install: project (editable)"
-			],
+			"dependsOn": ["install: project (editable)"],
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			}
-		},
-		{
-			"label": "clean: artifacts",
-			"type": "shell",
-			"command": "if (Test-Path build) { Remove-Item -Recurse -Force build }; if (Test-Path dist) { Remove-Item -Recurse -Force dist }; Get-ChildItem -Path . -Recurse -Directory -Filter *.egg-info -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force"
-		},
-		{
-			"label": "clean: cache",
-			"type": "shell",
-			"command": "Get-ChildItem -Path . -Name '*.pyc' -Recurse | ForEach-Object { Remove-Item $_ -Force }; Get-ChildItem -Path . -Name '__pycache__' -Recurse -Directory | Remove-Item -Recurse -Force"
-		},
-		{
-			"label": "test: full suite",
-			"type": "shell",
-			"command": "python -m pytest tests/ -v --tb=short",
-			"group": {
-				"kind": "test",
-				"isDefault": false
-			}
+			},
+			"problemMatcher": []
 		},
 		{
 			"label": "rebuild: clean -> build",
 			"type": "shell",
-			"command": "Write-Host Rebuilding...",
+			"command": "Write-Host 'Rebuilding...'",
 			"dependsOrder": "sequence",
-			"dependsOn": [
-				"clean: artifacts",
-				"build: sdist+wheel"
-			]
+			"dependsOn": ["clean: artifacts", "build: sdist+wheel"],
+			"group": "build",
+			"problemMatcher": []
+		},
+
+		// ===== Cleanup =====
+		{
+			"label": "clean: artifacts",
+			"type": "shell",
+			"command": "if (Test-Path build) { Remove-Item -Recurse -Force build }; if (Test-Path dist) { Remove-Item -Recurse -Force dist }; Get-ChildItem -Path . -Recurse -Directory -Filter *.egg-info -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force",
+			"problemMatcher": []
 		},
 		{
-			"label": "docs: html (Sphinx)",
+			"label": "clean: cache",
 			"type": "shell",
-			"command": ".\\.venv\\Scripts\\python -m pip install -U sphinx myst-parser sphinxcontrib-mermaid; Push-Location docs; ./make.bat html; Pop-Location",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"command": "Get-ChildItem -Path . -Name '*.pyc' -Recurse | ForEach-Object { Remove-Item $_ -Force }; Get-ChildItem -Path . -Name '__pycache__' -Recurse -Directory | Remove-Item -Recurse -Force",
+			"problemMatcher": []
 		},
+		{
+			"label": "clean: all",
+			"type": "shell",
+			"command": "Write-Host 'Cleaning all artifacts and cache...'",
+			"dependsOrder": "parallel",
+			"dependsOn": ["clean: artifacts", "clean: cache"],
+			"problemMatcher": []
+		},
+
+		// ===== Pre-commit =====
 		{
 			"label": "pre-commit: install",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -U pre-commit; .\\.venv\\Scripts\\pre-commit install",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"dependsOn": ["install: project (editable)"],
+			"problemMatcher": []
 		},
 		{
 			"label": "pre-commit: run all",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python -m pip install -U pre-commit; .\\.venv\\Scripts\\pre-commit run --all-files",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"dependsOn": ["install: project (editable)"],
+			"problemMatcher": []
 		},
+
+		// ===== Release =====
 		{
 			"label": "release: bump version (part input)",
 			"type": "shell",
 			"command": ".\\.venv\\Scripts\\python scripts/bump_version.py ${input:versionPart}",
-			"dependsOn": [
-				"install: project (editable)"
-			]
+			"dependsOn": ["install: project (editable)"],
+			"problemMatcher": []
 		},
 		{
 			"label": "release: build (clean -> sdist+wheel)",
 			"type": "shell",
-			"command": "Write-Host Building release...",
+			"command": "Write-Host 'Building release...'",
 			"dependsOrder": "sequence",
-			"dependsOn": [
-				"clean: artifacts",
-				"build: sdist+wheel"
-			]
+			"dependsOn": ["clean: artifacts", "build: sdist+wheel"],
+			"problemMatcher": []
 		},
 		{
 			"label": "release: upload (TestPyPI)",

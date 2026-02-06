@@ -12,7 +12,7 @@ Usage:
     patch: X.Y.Z -> X.Y.(Z+1)
     pre:   X.Y.Z -> X.Y.Z.postN (incremental post-release)
 - Writes the new version back to pyproject.toml
-- Optionally updates enhanced_adaptive_dbscan/__init__.py __version__ if present
+- Optionally updates wafer_defect_clustering/__init__.py __version__ if present
 
 Environment:
 - No external deps; uses tomllib (Python 3.11+) or tomli fallback if available.
@@ -30,7 +30,7 @@ except ModuleNotFoundError:  # pragma: no cover
 
 ROOT = Path(__file__).resolve().parents[1]
 PYPROJECT = ROOT / "pyproject.toml"
-PKG_INIT = ROOT / "enhanced_adaptive_dbscan" / "__init__.py"
+PKG_INIT = ROOT / "wafer_defect_clustering" / "__init__.py"
 
 
 def read_version() -> str:

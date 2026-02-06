@@ -29,3 +29,24 @@ ENV/
 env/
 .env/
 .venv/
+
+# Test artifacts and caches
+htmlcov/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Model artifacts from testing
+models/
+phase4_models/
+metrics/
+phase4_metrics/
+
+# Development notes
+Copilot-Processing.md
+*.log
+
+# Agent session artifacts
+artifacts/
+

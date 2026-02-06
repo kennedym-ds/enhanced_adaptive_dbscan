@@ -1,395 +1,220 @@
-# Enhanced Adaptive DBSCAN
+﻿# Wafer Defect Clustering
 
-[![PyPI version](https://badge.fury.io/py/enhanced-adaptive-dbscan.svg)](https://badge.fury.io/py/enhanced-adaptive-dbscan)
+[![PyPI version](https://badge.fury.io/py/wafer-defect-clustering.svg)](https://badge.fury.io/py/wafer-defect-clustering)
 [![CI](https://github.com/kennedym-ds/enhanced_adaptive_dbscan/workflows/CI/badge.svg)](https://github.com/kennedym-ds/enhanced_adaptive_dbscan/actions)
-[![Documentation](https://github.com/kennedym-ds/enhanced_adaptive_dbscan/workflows/Documentation/badge.svg)](https://kennedym-ds.github.io/enhanced_adaptive_dbscan/)
-[![codecov](https://codecov.io/gh/kennedym-ds/enhanced_adaptive_dbscan/branch/main/graph/badge.svg)](https://codecov.io/gh/kennedym-ds/enhanced_adaptive_dbscan)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A **comprehensive adaptive clustering framework** featuring three specialized clustering approaches: **Enhanced Adaptive DBSCAN**, **Ensemble Clustering**, and **Adaptive Parameter Optimization**. Designed for complex data analysis including semiconductor wafer defect detection, multi-density datasets, and automatic parameter tuning.
+Semiconductor wafer defect clustering with automatic pattern classification.
 
-## 🌟 Key Capabilities
+Built on [HDBSCAN](https://hdbscan.readthedocs.io/) with wafer-specific extensions that no general clustering library provides:
 
-### 🎯 Phase 1: Enhanced Adaptive DBSCAN
-- **Adaptive Parameter Selection:** Automatically adjusts ε (epsilon) and MinPts based on local density
-- **Multi-Scale Density Analysis:** Analyzes density patterns across multiple scales
-- **Stability-Based Cluster Selection:** Retains only robust, stable clusters
-- **Incremental Clustering:** Real-time updates with new data points
-- **Interactive Visualization:** Rich plotting capabilities with Plotly
+- **Edge density compensation** — corrects for geometric bias at wafer boundaries using circle-circle intersection geometry
+- **Defect pattern classification** — automatically identifies scratches, rings, edge clusters, centre spots, zone patterns, and repeating die patterns
+- **Wafer-aware visualization** — interactive Plotly wafer maps with zone overlays, die grids, and pattern annotations
+- **Feature encoding** — handles heterogeneous defect attributes (size, severity, layer, classification code)
+- **Full sklearn compatibility** — `BaseEstimator` / `ClusterMixin`, `fit()`, `fit_predict()`, `get_params()` / `set_params()`
 
-### 🎪 Phase 2: Ensemble & Multi-Density Clustering  
-- **Parameter Ensemble Generation:** Creates diverse parameter sets for robust clustering
-- **Consensus Voting Mechanisms:** Multiple voting strategies (majority, weighted, quality-based)
-- **Multi-Density Region Detection:** Handles datasets with varying density patterns
-- **Boundary Analysis:** Advanced boundary point detection and refinement
-- **Cluster Quality Assessment:** Comprehensive quality metrics and validation
+## Why not just HDBSCAN?
 
-### 🧠 Phase 3: Adaptive Optimization Framework
-- **Bayesian Parameter Optimization:** Gaussian Process-based parameter search
-- **Genetic Algorithm Optimization:** Evolution-based parameter exploration
-- **Performance Prediction:** ML-based clustering outcome prediction
-- **Meta-Learning:** Cross-dataset learning and strategy recommendation
-- **Automated Parameter Tuning:** Intelligent parameter space exploration
+HDBSCAN is an excellent general-purpose density-based clustering algorithm.  This library adds the **semiconductor domain layer** on top:
 
-### 🏭 Phase 4: Production Pipeline & Enterprise Integration
-- **Streaming Clustering Engine:** Real-time data processing with concept drift detection
-- **Production Pipeline:** Complete model lifecycle management (train, validate, deploy, monitor)
-- **RESTful Web API:** Flask-based API with health monitoring and clustering endpoints
-- **Enterprise Integration:** Configuration management, deployment automation, and monitoring
+| Problem | HDBSCAN alone | This library |
+|---|---|---|
+| Edge bias | Treats all space equally — edge clusters appear less dense | Circle-circle intersection geometry compensates for truncated neighbourhoods |
+| Pattern ID | Gives you cluster labels | Classifies clusters as *scratch*, *ring*, *centre spot*, *edge cluster*, *zone pattern*, or *repeating* |
+| Wafer geometry | No concept of wafer shape | Built-in circular/square wafer, notch/flat, edge exclusion zones |
+| Die mapping | N/A | Aggregates defects to die-level counts |
+| Zone analysis | N/A | Standard centre/middle/edge zone masking |
+| Defect features | You build your own feature matrix | `DefectFeatureEncoder` handles log-size, severity, layer encoding with configurable weights |
 
-## 📦 Installation
-
-Install from PyPI:
+## Quick Start
 
 ```bash
-pip install enhanced-adaptive-dbscan
+pip install wafer-defect-clustering
 ```
-
-For Phase 4 production features, install with additional dependencies:
-
-```bash
-pip install enhanced-adaptive-dbscan[production]
-# or manually install Flask dependencies:
-pip install enhanced-adaptive-dbscan flask flask-cors pyyaml
-```
-
-Or install from source:
-
-```bash
-git clone https://github.com/kennedym-ds/enhanced_adaptive_dbscan.git
-cd enhanced_adaptive_dbscan
-pip install -e .
-```
-
-## 🔧 Quick Start
-
-### Basic Adaptive DBSCAN
 
 ```python
-from enhanced_adaptive_dbscan import EnhancedAdaptiveDBSCAN
-import numpy as np
+from wafer_defect_clustering import WaferMap, WaferClusterer, plot_wafer_map
 
-# Generate synthetic data
-X = np.random.randn(1000, 2)
-severity = np.random.randint(1, 11, size=(1000, 1))
+# Create wafer and add inspection data
+wafer = WaferMap(diameter_mm=300, edge_exclusion_mm=3.0)
+wafer.add_defects(x=defect_x, y=defect_y, size=defect_sizes)
 
-# Initialize the model
-model = EnhancedAdaptiveDBSCAN(
-    wafer_shape='circular',
-    wafer_size=100,
-    k=20,
-    density_scaling=1.0,
-    additional_features=[2],  # Include severity as feature
-    feature_weights=[1.0],
-    stability_threshold=0.6
-)
+# Cluster with edge compensation
+clusterer = WaferClusterer(min_cluster_size=5, edge_compensation=True)
+labels = clusterer.fit_predict(wafer)
 
-# Fit and get results
-X_full = np.hstack((X, severity))
-model.fit(X_full, additional_attributes=severity)
-labels = model.labels_
+# Results
+print(clusterer.summary())
+#   cluster_id  n_defects pattern_type  pattern_confidence  ...  zone
+# 0          0         23      scratch               0.871  ...  middle
+# 1          1         15         ring               0.784  ...  edge
+# 2          2          8  center_spot               0.912  ...  center
 
-# Visualize results
-model.plot_clusters(X_full)
-model.evaluate_clustering(X_full[:, :2], labels)
+# Interactive wafer map
+fig = plot_wafer_map(wafer, labels, show_zones=True)
+fig.show()
 ```
 
-### Ensemble Clustering
+## Core Concepts
+
+### WaferMap — the domain object
 
 ```python
-from enhanced_adaptive_dbscan.ensemble_clustering import ConsensusClusteringEngine
-import numpy as np
+from wafer_defect_clustering import WaferMap
 
-# Create diverse parameter sets
-engine = ConsensusClusteringEngine(
-    n_estimators=50,
-    voting_strategy='quality_weighted',
-    stability_threshold=0.7
+wafer = WaferMap(
+    diameter_mm=300,           # 200, 300, or 450 mm
+    edge_exclusion_mm=3.0,     # no-die zone at edge
+    notch_angle_deg=270,       # 6 o'clock (industry standard for 300mm)
 )
 
-# Generate synthetic multi-density data
-X = np.vstack([
-    np.random.normal(0, 0.5, (200, 2)),      # Dense cluster
-    np.random.normal(5, 1.5, (100, 2)),      # Sparse cluster
-    np.random.normal([0, 5], 0.8, (150, 2))  # Medium density
-])
+# Add defect inspection data (coordinates in mm from wafer centre)
+wafer.add_defects(
+    x=x_coords, y=y_coords,
+    size=defect_sizes,         # µm² (optional)
+    kill=kill_flags,           # 0/1 (optional)
+    layer=layer_ids,           # process layer (optional)
+    classcode=class_codes,     # defect classification (optional)
+)
 
-# Perform consensus clustering
-consensus_labels = engine.fit_consensus_clustering(X)
-quality_scores = engine.get_cluster_quality_scores()
-
-print(f"Consensus clustering found {len(set(consensus_labels)) - 1} clusters")
-print(f"Average quality score: {np.mean(list(quality_scores.values())):.3f}")
+# Geometry-aware queries
+wafer.distance_to_edge()               # mm to nearest edge
+wafer.get_zone_mask('edge')             # boolean mask
+wafer.get_zone_label()                  # 'center'/'middle'/'edge' per defect
+wafer.to_die_map(die_size_mm=(10, 10))  # DataFrame of die-level counts
 ```
 
-### Adaptive Parameter Optimization
+### WaferClusterer — HDBSCAN with wafer domain logic
 
 ```python
-from enhanced_adaptive_dbscan.adaptive_optimization import AdaptiveTuningEngine
-import numpy as np
+from wafer_defect_clustering import WaferClusterer, DefectFeatureEncoder
 
-# Create optimization engine
-tuning_engine = AdaptiveTuningEngine(
-    optimization_method='bayesian',  # or 'genetic'
-    n_iterations=50,
-    prediction_enabled=True,
-    meta_learning_enabled=True
+# Spatial-only clustering (default)
+clusterer = WaferClusterer(
+    min_cluster_size=5,
+    edge_compensation=True,          # correct edge density bias
+    compensation_bandwidth_mm=5.0,   # compensation kernel width
+    classify_patterns=True,          # auto-classify cluster patterns
+    cluster_selection_method='eom',  # HDBSCAN selection method
 )
 
-# Define parameter space to optimize
-parameter_space = {
-    'eps': (0.1, 2.0),
-    'min_samples': (5, 50)
-}
-
-# Optimize parameters for your data
-result = tuning_engine.optimize_parameters(
-    X, parameter_space, 
-    optimization_metric='silhouette_score'
+# With defect attribute encoding
+encoder = DefectFeatureEncoder(
+    spatial_weight=1.0,    # x, y importance
+    size_weight=0.5,       # defect size importance
+    severity_weight=0.3,   # kill flag importance
+    layer_weight=0.2,      # process layer importance
+)
+clusterer = WaferClusterer(
+    min_cluster_size=5,
+    feature_encoder=encoder,
+    edge_compensation=False,  # precomputed distances not needed with feature encoder
 )
 
-print(f"Best parameters: {result.best_parameters}")
-print(f"Best score: {result.best_score:.3f}")
-print(f"Optimization insights: {result.meta_learning_insights}")
+labels = clusterer.fit_predict(wafer)
+
+# Access HDBSCAN outputs directly
+clusterer.probabilities_        # membership probabilities
+clusterer.outlier_scores_       # GLOSH outlier scores
+clusterer.cluster_persistence_  # cluster persistence
+clusterer.pattern_results_      # {cluster_id: PatternResult}
+clusterer.n_clusters            # number of clusters (excl. noise)
+clusterer.noise_fraction        # fraction labelled as noise
 ```
 
-### Production Pipeline & Streaming (Phase 4)
+### DefectPatternClassifier — automatic pattern recognition
 
 ```python
-from enhanced_adaptive_dbscan.production_pipeline import ProductionPipeline, DeploymentConfig
-from enhanced_adaptive_dbscan.streaming_engine import StreamingClusteringEngine, StreamingConfig
-from enhanced_adaptive_dbscan.web_api import ClusteringWebAPI
-import numpy as np
+from wafer_defect_clustering import DefectPatternClassifier
 
-# 1. Production Pipeline Setup
-config = DeploymentConfig(
-    model_name="adaptive_dbscan_prod",
-    version="1.0",
-    environment="production",
-    model_store_path="./models",
-    metrics_store_path="./metrics",
-    auto_scaling=True
-)
+clf = DefectPatternClassifier(wafer)
+results = clf.classify_all(labels)
 
-pipeline = ProductionPipeline(config)
-
-# 2. Train and deploy model
-X = np.random.randn(1000, 2)
-model = pipeline.train_model(X)
-deployment_id = pipeline.deploy_model(model)
-print(f"Model deployed with ID: {deployment_id}")
-
-# 3. Real-time streaming clustering
-streaming_config = StreamingConfig(
-    window_size=100,
-    overlap=0.1,
-    enable_concept_drift_detection=True,
-    drift_threshold=0.05
-)
-
-streaming_engine = StreamingClusteringEngine(model, streaming_config)
-streaming_engine.start_streaming()
-
-# Process real-time data
-for _ in range(10):
-    new_point = np.random.randn(1, 2)
-    result = streaming_engine.process_point(new_point[0])
-    print(f"Point clustered: {result['cluster_id']}")
-
-# 4. Web API for enterprise integration
-api = ClusteringWebAPI(host="localhost", port=5001, debug=False)
-# Visit http://localhost:5001/api/health for system status
-# POST to http://localhost:5001/api/cluster for clustering requests
+for cluster_id, result in results.items():
+    print(f"Cluster {cluster_id}: {result.pattern_type} "
+          f"(confidence={result.confidence:.2f})")
+    print(f"  Details: {result.details}")
 ```
 
-## 📚 Documentation
+**Detected patterns:**
+- `scratch` — linear defects (PCA eccentricity + aspect ratio)
+- `ring` — annular pattern at consistent radius (radial CV + angular span)
+- `center_spot` — concentration near wafer centre (radial density)
+- `edge_cluster` — concentration at wafer periphery (distance-to-edge stats)
+- `zone_pattern` — confined to angular sector (circular std deviation)
+- `repeating` — periodic die-grid pattern (intra-die position clustering)
+- `random` — no geometric signature (default fallback)
 
-- **API Reference:** [Full documentation](https://kennedym-ds.github.io/enhanced_adaptive_dbscan/)
-- **Examples:** Check the [`examples/`](examples/) directory for detailed usage examples
-- **Algorithm Details:** See our [detailed algorithm overview](https://kennedym-ds.github.io/enhanced_adaptive_dbscan/algorithm.html)
-
-## 🛠️ Development
-
-### Local Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/kennedym-ds/enhanced_adaptive_dbscan.git
-cd enhanced_adaptive_dbscan
-
-# Create virtual environment
-python -m venv .venv
-./.venv/Scripts/activate  # Windows
-# source .venv/bin/activate  # Linux/macOS
-
-# Install in development mode
-pip install -e .[dev]
-
-# Install pre-commit hooks
-pre-commit install
-```
-
-### Running Tests
-
-```bash
-# Run tests with coverage
-pytest --cov=enhanced_adaptive_dbscan --cov-report=html
-
-# Run linting
-ruff check .
-
-# Run type checking
-mypy .
-```
-
-### Building Documentation
-
-```bash
-cd docs
-make html
-```
-
-## 🔬 Algorithm Overview
-
-The Enhanced Adaptive DBSCAN framework provides three complementary clustering approaches:
-
-### 🎯 Phase 1: Core Adaptive DBSCAN
-
-**Key Innovation**: Dynamic parameter adaptation based on local density patterns
-
-- **Adaptive Parameters**: Automatically adjusts `eps` and `min_samples` for each point
-- **Multi-Scale Analysis**: Analyzes density across multiple scales for robust detection
-- **Wafer-Aware Clustering**: Optimized for semiconductor defect detection
-- **Stability Filtering**: Retains only clusters that persist across parameter variations
-- **Incremental Updates**: Efficient real-time data processing
-
-**Algorithm Steps**:
-1. **Local Density Estimation**: k-NN based density computation
-2. **Adaptive Parameter Selection**: Point-wise `eps` and `min_samples` adjustment  
-3. **Multi-Scale Clustering**: Clustering across density scales
-4. **Stability Assessment**: Cluster persistence evaluation
-5. **Incremental Processing**: Real-time data integration
-
-### 🎪 Phase 2: Ensemble & Multi-Density Methods
-
-**Key Innovation**: Consensus-based clustering with multi-density awareness
-
-- **Parameter Diversity**: Generates diverse parameter sets for robust clustering
-- **Voting Mechanisms**: Multiple consensus strategies (majority, weighted, quality-based)
-- **Multi-Density Handling**: Specialized algorithms for varying density regions
-- **Boundary Processing**: Advanced boundary point analysis and refinement
-- **Quality Assessment**: Comprehensive cluster validation metrics
-
-**Core Components**:
-1. **Parameter Ensemble**: Strategic parameter space sampling
-2. **Consensus Voting**: Multi-strategy result aggregation
-3. **Multi-Density Engine**: Region-aware clustering algorithms
-4. **Boundary Processor**: Cluster boundary analysis and refinement
-5. **Quality Analyzer**: Multi-metric cluster validation
-
-### 🧠 Phase 3: Adaptive Optimization Framework
-
-**Key Innovation**: AI-powered parameter optimization with meta-learning
-
-- **Bayesian Optimization**: Gaussian Process-based parameter search
-- **Genetic Algorithms**: Evolution-based parameter exploration  
-- **Performance Prediction**: ML-based clustering outcome forecasting
-- **Meta-Learning**: Cross-dataset strategy recommendation
-- **Automated Tuning**: Intelligent parameter space exploration
-
-**Optimization Methods**:
-1. **Bayesian Optimizer**: GP-based acquisition function optimization
-2. **Genetic Optimizer**: Population-based evolutionary search
-3. **Performance Predictor**: ML-based outcome prediction
-4. **Meta-Learning Component**: Cross-dataset learning and recommendations
-5. **Parameter Explorer**: Intelligent space exploration strategies
-
-### 🏭 Phase 4: Production Pipeline & Enterprise Integration
-
-**Key Innovation**: Enterprise-ready clustering platform with streaming and deployment automation
-
-- **Streaming Clustering**: Real-time data processing with concept drift detection
-- **Model Lifecycle Management**: Automated training, validation, deployment, and monitoring
-- **RESTful API**: Enterprise integration with health monitoring and clustering endpoints
-- **Configuration Management**: Environment-specific deployment configurations
-- **Performance Monitoring**: Real-time metrics and alerting for production operations
-
-**Production Components**:
-1. **Streaming Engine**: Real-time clustering with drift detection
-2. **Production Pipeline**: Complete model lifecycle automation
-3. **Web API**: RESTful endpoints for enterprise integration
-4. **Model Store**: Versioned model persistence and retrieval
-5. **Performance Monitor**: Operational metrics and alerting
-
-## 🧮 Technical Details
-
-### Multi-Scale Density Analysis
-The framework performs density analysis across multiple scales to capture varying cluster characteristics:
+### Visualization
 
 ```python
-# Multi-scale density computation
-scales = [0.5, 1.0, 1.5, 2.0]  # Density scaling factors
-for scale in scales:
-    local_eps = base_eps * scale * density_factor[point]
-    # Perform clustering at this scale
+from wafer_defect_clustering import (
+    plot_wafer_map,
+    plot_wafer_grid,
+    plot_radial_distribution,
+    plot_pattern_summary,
+    plot_cluster_details,
+)
+
+# Single wafer with clusters, zones, die grid
+plot_wafer_map(wafer, labels, show_zones=True, show_dies=True)
+
+# Lot overview (multiple wafers)
+plot_wafer_grid(wafer_list, labels_list, ncols=5)
+
+# Radial distribution histogram
+plot_radial_distribution(wafer, labels)
+
+# Pattern confidence bar chart
+plot_pattern_summary(clusterer.pattern_results_)
+
+# Detailed single-cluster view with pattern overlay
+plot_cluster_details(wafer, labels, cluster_id=0,
+                     pattern_result=clusterer.pattern_results_[0])
 ```
 
-### Consensus Voting Strategies
-Multiple voting mechanisms ensure robust cluster assignment:
+## Edge Density Compensation
 
-- **Majority Voting**: Simple democratic consensus
-- **Weighted Voting**: Parameter-quality weighted decisions  
-- **Quality-Based Voting**: Performance-metric driven consensus
+The key innovation.  Near wafer edges, defect neighbourhoods are truncated by the physical boundary — a cluster at the edge appears less dense than an identical cluster at the centre.
 
-### Optimization Algorithms
-The framework includes multiple optimization approaches:
+This library computes the **exact fractional area** of each point's neighbourhood circle that falls inside the wafer (circle-circle intersection), and scales distances accordingly:
 
-- **Bayesian Optimization**: Efficient for continuous parameter spaces
-- **Genetic Algorithms**: Effective for discrete/mixed parameter spaces
-- **Hybrid Approaches**: Combining multiple optimization strategies
+```python
+from wafer_defect_clustering import compute_edge_density_weights
 
-## 🤝 Contributing
-
-We welcome contributions! Here's how to get started:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes and add tests
-4. Ensure all tests pass (`pytest`)
-5. Run pre-commit hooks (`pre-commit run --all-files`)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
-
-Please ensure your code follows our coding standards and includes appropriate tests.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Contact
-
-- **Author**: Michael Kennedy
-- **Email**: kennedym.ds@gmail.com
-- **GitHub**: [@kennedym-ds](https://github.com/kennedym-ds)
-
-## 🙏 Acknowledgments
-
-- Built on top of the excellent [scikit-learn](https://scikit-learn.org/) library
-- Inspired by the original DBSCAN algorithm by Ester et al.
-- Special thanks to the open-source community for their invaluable contributions
-
-## 📖 Citation
-
-If you use this algorithm in your research, please cite:
-
-```bibtex
-@software{kennedy_enhanced_adaptive_dbscan_2024,
-  author = {Kennedy, Michael},
-  title = {Enhanced Adaptive DBSCAN},
-  year = {2024},
-  url = {https://github.com/kennedym-ds/enhanced_adaptive_dbscan},
-  version = {1.0.0}
-}
+weights = compute_edge_density_weights(wafer, bandwidth_mm=5.0)
+# weights ≈ 1.0 at centre, > 1.0 near edge
 ```
+
+The compensated distance matrix is passed to HDBSCAN with `metric='precomputed'`, ensuring edge clusters receive fair density estimates.
+
+## API Reference
+
+| Class / Function | Purpose |
+|---|---|
+| `WaferMap` | Wafer geometry + defect data model |
+| `WaferGeometry` | Physical wafer parameters (dataclass) |
+| `ZoneDefinition` | Named radial zone on wafer |
+| `WaferClusterer` | HDBSCAN wrapper with edge compensation + pattern classification |
+| `DefectFeatureEncoder` | Encode defect attributes into weighted features |
+| `DefectPatternClassifier` | Classify clusters into known defect patterns |
+| `PatternResult` | Pattern classification result (dataclass) |
+| `compute_edge_density_weights` | Per-defect edge compensation weights |
+| `apply_edge_compensation` | Build compensated distance matrix |
+| `plot_wafer_map` | Interactive wafer map plot |
+| `plot_wafer_grid` | Lot-level wafer grid |
+| `plot_radial_distribution` | Radial histogram |
+| `plot_pattern_summary` | Pattern confidence bar chart |
+| `plot_cluster_details` | Single-cluster detail with pattern overlay |
+
+## Requirements
+
+- Python >= 3.10
+- [hdbscan](https://hdbscan.readthedocs.io/) >= 0.8.40
+- numpy, scikit-learn, scipy, plotly, pandas
+
+## License
+
+MIT
