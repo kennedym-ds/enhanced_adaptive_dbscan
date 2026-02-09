@@ -14,7 +14,7 @@ mypy>=1.10,<2.0
 pre-commit>=3.7,<4.0
 
 # Documentation
-sphinx>=7.4,<8.0
+sphinx>=7.4,<9.0
 myst-parser>=4.0,<5.0
 
 # Type checking stubs
