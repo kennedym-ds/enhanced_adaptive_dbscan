@@ -12,4 +12,4 @@ hdbscan>=0.8.40
 pandas>=2.2,<3.0
 
 # Visualization
-plotly>=5.24,<6.0
+plotly>=5.24,<7.0
